@@ -1,21 +1,87 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>GAME TITLE</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>이지환 포트폴리오</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="title-container">
-    <h1 class="glow-title">GAME TITLE</h1>
-  </div>
-  <div class="stars"></div>
-  <div class="btn-group">
-    <button class="custom-btn btn-neo-glow">Story .</button>
-    <button class="custom-btn btn-neo-glow">Arcade .</button>
-    <button class="custom-btn btn-neo-glow">Setting .</button>
-    <button class="custom-btn btn-neo-glow">Credit .</button>
-    
-  </div>
+  <div class="progress-bar" id="progressBar"></div>
+
+  <nav>
+    <div class="nav-left">
+      <span id="themeToggle">🌙</span>
+      <a href="#planning">기획</a>
+      <a href="#develop">개발</a>
+      <a href="#sound">사운드</a>
+      <a href="#art">아트</a>
+    </div>
+    <div class="nav-right">
+      <input type="text" id="searchInput" placeholder="검색어 입력...">
+    </div>
+  </nav>
+
+  <section class="intro">
+    <div class="intro-container">
+      <div class="intro-slider">
+        <img src="https://via.placeholder.com/1600x900" alt="slide1">
+        <img src="https://via.placeholder.com/1600x900" alt="slide2">
+      </div>
+      <div class="intro-overlay">
+        <h1>
+          <span>이</span><span>지</span><span>환</span>
+        </h1>
+        <p class = "gradient-text">상상하고 구현하는 사람</p>
+      </div>
+    </div>
+    <div class="scroll-arrow">↓</div>
+  </section>
+
+  <!-- Sections -->
+  <section id="planning" class="fade-section">
+    <h2 class="section-title red">기획</h2>
+    <div class="experience-block">
+      <div class="item"><img src="https://via.placeholder.com/40"><p><strong>BARO</strong> – 시간·장소 조율 (PM)</p></div>
+      <div class="item"><img src="https://via.placeholder.com/40"><p><strong>도란도란</strong> – 음성 기반 AI 힐링 메타버스</p></div>
+    </div>
+  </section>
+
+  <section id="develop" class="fade-section">
+    <h2 class="section-title blue">개발</h2>
+    <div class="experience-block">
+      <div class="item"><img src="https://via.placeholder.com/40"><p><strong>러닝타임</strong> – 우리는 왜 달리는가?</p></div>
+      <div class="item"><img src="https://via.placeholder.com/40"><p><strong>whoamI</strong> – 미스터리 비주얼 노벨</p></div>
+    </div>
+  </section>
+
+  <section id="sound" class="fade-section">
+    <h2 class="section-title green">사운드</h2>
+    <div class="experience-block">
+      <div class="item"><img src="https://via.placeholder.com/40"><p><strong>Fmod, LMMS</strong> – BGM 및 효과음 제작</p></div>
+      <div class="item"><img src="https://via.placeholder.com/40"><p><strong>SynthV</strong> – AI보컬 믹싱</p></div>
+    </div>
+  </section>
+
+  <section id="art" class="fade-section">
+    <h2 class="section-title gold">아트</h2>
+    <div class="experience-block">
+      <div class="item"><img src="https://via.placeholder.com/40"><p><strong>ClipStudio</strong> – 굿즈 디자인</p></div>
+      <div class="item"><img src="https://via.placeholder.com/40"><p><strong>Blender</strong> – 3D 모델링</p></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Contact: leejihwan.dev@gmail.com</p>
+    <p>
+      <a href="#">GitHub</a>
+      <a href="#">Notion</a>
+      <a href="#">LinkedIn</a>
+    </p>
+    <p>&copy; 2025 이지환. All rights reserved.</p>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>
