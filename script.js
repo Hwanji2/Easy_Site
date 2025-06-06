@@ -113,7 +113,7 @@ if (document.getElementById('gameCanvas')) {
 
   document.addEventListener('keydown', e => {
     if (e.code === 'Space' && player.y >= 110 && !player.sliding) {
-      player.vy = -8;
+      player.vy = -10; // higher initial jump velocity
     }
     if (e.code === 'ArrowDown') {
       player.sliding = true;
@@ -146,7 +146,7 @@ if (document.getElementById('gameCanvas')) {
         player.sliding = false;
         player.h = 20;
       } else if (player.y >= 110 && !player.sliding) {
-        player.vy = -8;
+        player.vy = -10; // higher initial jump velocity
       }
     }
     startY = null;
@@ -154,7 +154,7 @@ if (document.getElementById('gameCanvas')) {
 
   function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    player.vy += 0.5;
+    player.vy += 0.4; // slightly reduced gravity for longer hang time
     player.y += player.vy;
     if (player.y > 110) { player.y = 110; player.vy = 0; }
 
