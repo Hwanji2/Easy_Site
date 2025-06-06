@@ -88,18 +88,36 @@ if (book && pages.length) {
 if (document.getElementById('gameCanvas')) {
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
-  const player = { x: 30, y: 110, w: 20, h: 20, vy: 0 };
+  const texts = Array.from(document.querySelectorAll('h2, p, li'))
+    .map(el => el.textContent.trim())
+    .filter(t => t.length > 0 && t.length < 15);
+  const player = { x: 30, y: 110, w: 20, h: 20, vy: 0, sliding: false };
   const obstacles = [];
   let frame = 0;
   let score = 0;
+  let best = parseInt(localStorage.getItem('highscore') || '0');
 
   function spawn() {
-    obstacles.push({ x: canvas.width, y: 120, w: 20, h: 20 });
+    const high = Math.random() < 0.5;
+    const text = texts[Math.floor(Math.random() * texts.length)] || 'TXT';
+    ctx.font = '16px sans-serif';
+    const w = ctx.measureText(text).width + 10;
+    obstacles.push({ x: canvas.width, y: high ? 80 : 120, w, h: 20, text });
   }
 
   document.addEventListener('keydown', e => {
-    if (e.code === 'Space' && player.y >= 110) {
+    if (e.code === 'Space' && player.y >= 110 && !player.sliding) {
       player.vy = -8;
+    }
+    if (e.code === 'ArrowDown') {
+      player.sliding = true;
+      player.h = 10;
+    }
+  });
+  document.addEventListener('keyup', e => {
+    if (e.code === 'ArrowDown') {
+      player.sliding = false;
+      player.h = 20;
     }
   });
 
@@ -113,10 +131,11 @@ if (document.getElementById('gameCanvas')) {
     obstacles.forEach(o => o.x -= 2);
     if (obstacles.length && obstacles[0].x + obstacles[0].w < 0) { obstacles.shift(); score++; }
 
-    // collision
     obstacles.forEach(o => {
-      if (player.x < o.x + o.w && player.x + player.w > o.x && player.y < o.y + o.h && player.y + player.h > o.y) {
-        score = 0; obstacles.length = 0; o.x = canvas.width; 
+      if (player.x < o.x + o.w && player.x + player.w > o.x &&
+          player.y < o.y + o.h && player.y + player.h > o.y) {
+        if (score > best) { best = score; localStorage.setItem('highscore', best); }
+        score = 0; obstacles.length = 0; o.x = canvas.width;
       }
     });
 
@@ -125,9 +144,11 @@ if (document.getElementById('gameCanvas')) {
     ctx.fillStyle = '#3399ff';
     ctx.fillRect(player.x, player.y, player.w, player.h);
     ctx.fillStyle = '#ff5555';
-    obstacles.forEach(o => ctx.fillRect(o.x, o.y, o.w, o.h));
+    obstacles.forEach(o => {
+      ctx.fillText(o.text, o.x, o.y);
+    });
     ctx.fillStyle = '#000';
-    ctx.fillText('Score: ' + score, 10, 10);
+    ctx.fillText('Score: ' + score + '  Best: ' + best, 10, 10);
     frame++;
     requestAnimationFrame(update);
   }
@@ -141,8 +162,21 @@ if (audio) {
   const left = document.getElementById('leftVolume');
   const right = document.getElementById('rightVolume');
   const playBtn = document.getElementById('playPause');
+  const prevBtn = document.getElementById('prevTrack');
+  const nextBtn = document.getElementById('nextTrack');
   const bar = document.querySelector('.progress-bar-audio');
   const progress = bar.querySelector('.progress');
+  const list = document.querySelectorAll('.playlist li');
+  const tracks = Array.from(list).map(li => li.dataset.src);
+  let trackIndex = 0;
+  function load(i) {
+    trackIndex = (i + tracks.length) % tracks.length;
+    audio.src = tracks[trackIndex];
+    list.forEach(li => li.classList.remove('active'));
+    list[trackIndex].classList.add('active');
+    if (!audio.paused) audio.play();
+  }
+  list.forEach((li, idx) => li.addEventListener('click', () => load(idx)));
 
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const source = ctx.createMediaElementSource(audio);
@@ -157,6 +191,8 @@ if (audio) {
     if (audio.paused) { audio.play(); playBtn.textContent = '⏸'; }
     else { audio.pause(); playBtn.textContent = '▶'; }
   });
+  prevBtn.addEventListener('click', () => load(trackIndex - 1));
+  nextBtn.addEventListener('click', () => load(trackIndex + 1));
   audio.addEventListener('timeupdate', () => {
     progress.style.width = (audio.currentTime / audio.duration * 100) + '%';
   });
@@ -176,17 +212,23 @@ if (audio) {
   right.addEventListener('input', () => {
     gainR.gain.value = master.value * right.value;
   });
+  load(0);
 }
 
 // 간단한 계산기
 const calc = document.getElementById('calc');
 if (calc) {
   const display = document.getElementById('calcDisplay');
+  const history = document.getElementById('calcHistory');
   calc.addEventListener('click', e => {
     if (e.target.tagName !== 'BUTTON') return;
     const v = e.target.textContent;
     if (v === 'C') display.value = '';
-    else if (v === '=') display.value = eval(display.value || '0');
+    else if (v === '=') {
+      const result = eval(display.value || '0');
+      if (history) history.insertAdjacentHTML('afterbegin', `<li>${display.value} = ${result}</li>`);
+      display.value = result;
+    }
     else display.value += v;
   });
 }
