@@ -92,6 +92,21 @@ body.light nav a:hover {
   color: black;
 }
 
+.nav-left a {
+  padding: 6px 12px;
+  border-radius: 20px;
+  transition: background-color 0.3s, color 0.3s;
+}
+.nav-left a:hover,
+.nav-left a.active {
+  background: linear-gradient(45deg, #3399ff, #ff00ff);
+  color: #fff;
+}
+body.light .nav-left a:hover,
+body.light .nav-left a.active {
+  color: #fff;
+}
+
 #themeToggle {
   font-size: 1.2rem;
   cursor: pointer;
@@ -345,3 +360,56 @@ body.light .skill-table td {
   margin-top: 20px;
   font-style: italic;
 }
+
+/* Planning pages */
+.planning-pages {
+  position: relative;
+  min-height: 60px;
+}
+.page { display: none; }
+.page.active { display: block; }
+.page-controls { text-align: center; margin-top: 10px; }
+.page-controls button {
+  padding: 4px 12px;
+  margin: 0 5px;
+  cursor: pointer;
+}
+
+/* Simple runner game */
+#gameCanvas {
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+}
+.game-instr { margin-top: 5px; font-size: 0.9rem; }
+
+/* Custom audio player */
+.audio-player {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+.progress-bar-audio {
+  width: 200px;
+  height: 6px;
+  background: #555;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+}
+body.light .progress-bar-audio { background: #ddd; }
+.progress-bar-audio .progress {
+  height: 100%;
+  width: 0;
+  background: #66cc66;
+  border-radius: 3px;
+}
+#playPause {
+  background: #3399ff;
+  color: #fff;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+#playPause:hover { background: #2377d7; }
