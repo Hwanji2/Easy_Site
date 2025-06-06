@@ -75,10 +75,20 @@
   <!-- Sections -->
   <section id="planning" class="fade-section">
     <h2 class="section-title red">기획</h2>
-    <div class="experience-block">
-      <div class="item"><img src="https://via.placeholder.com/40" alt="book"><p><strong>자가출판</strong> 및 ISBN 발급</p></div>
-      <div class="item"><img src="https://via.placeholder.com/40" alt="booth"><p><strong>새맞주 부스</strong> 전시 출품 및 운영 (24-2, 25-1)</p></div>
-      <div class="item"><img src="https://via.placeholder.com/40" alt="share"><p><strong>러닝앤쉐어링</strong> 팀장</p></div>
+    <div class="planning-pages">
+      <div class="page active">
+        <div class="item"><img src="https://via.placeholder.com/40" alt="book"><p><strong>자가출판</strong> 및 ISBN 발급</p></div>
+      </div>
+      <div class="page">
+        <div class="item"><img src="https://via.placeholder.com/40" alt="booth"><p><strong>새맞주 부스</strong> 전시 출품 및 운영 (24-2, 25-1)</p></div>
+      </div>
+      <div class="page">
+        <div class="item"><img src="https://via.placeholder.com/40" alt="share"><p><strong>러닝앤쉐어링</strong> 팀장</p></div>
+      </div>
+    </div>
+    <div class="page-controls">
+      <button id="prevPage">이전</button>
+      <button id="nextPage">다음</button>
     </div>
   </section>
 
@@ -102,8 +112,8 @@
       <button data-target="calc">계산기</button>
     </div>
     <div id="game" class="dev-content">
-      <p id="score">0</p>
-      <button id="addScore">+1</button>
+      <canvas id="gameCanvas" width="300" height="150"></canvas>
+      <p class="game-instr">스페이스바로 점프!</p>
     </div>
     <div id="obj3d" class="dev-content">
       <canvas id="cubeCanvas" width="300" height="200"></canvas>
@@ -130,7 +140,9 @@
       <iframe width="360" height="203" src="https://www.youtube.com/embed/Y5xksEwKObc" title="YouTube video" frameborder="0" allowfullscreen></iframe>
     </div>
     <div class="audio-player">
-      <audio id="audio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" controls></audio>
+      <audio id="audio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+      <button id="playPause">▶</button>
+      <div class="progress-bar-audio"><div class="progress"></div></div>
       <div class="controls">
         Master <input type="range" id="masterVolume" min="0" max="1" step="0.01" value="1">
         L <input type="range" id="leftVolume" min="0" max="1" step="0.01" value="1">
