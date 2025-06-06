@@ -302,3 +302,25 @@ body.light footer a {
 body.light footer a:hover {
   text-decoration: underline;
 }
+
+/* 스킬 테이블 */
+.skill-table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+}
+.skill-table th,
+.skill-table td {
+  border: 1px solid #666;
+  padding: 6px 10px;
+  text-align: left;
+}
+body.light .skill-table th,
+body.light .skill-table td {
+  border-color: #ccc;
+}
+
+.etc-foot {
+  margin-top: 20px;
+  font-style: italic;
+}
