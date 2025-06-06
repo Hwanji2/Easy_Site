@@ -430,8 +430,9 @@ body.light .skill-table td {
 
 /* Simple runner game */
 #gameCanvas {
-  background: #f0f0f0;
-  border: 1px solid #ccc;
+  background: linear-gradient(#e8f4ff, #bcd4ff);
+  border: 1px solid #8ab4f8;
+  border-radius: 4px;
 }
 .game-instr { margin-top: 5px; font-size: 0.9rem; }
 
@@ -470,6 +471,27 @@ body.light .progress-bar-audio { background: #b5d7b5; }
 }
 #playPause:hover, #prevTrack:hover, #nextTrack:hover {
   background: #3a8b3a;
+}
+.audio-player input[type=range] {
+  -webkit-appearance: none;
+  width: 80px;
+  height: 4px;
+  background: #6eba6e;
+  border-radius: 4px;
+}
+.audio-player input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: #4caf50;
+  border-radius: 50%;
+  cursor: pointer;
+}
+body.light .audio-player input[type=range] {
+  background: #c8eac8;
+}
+body.light .audio-player input[type=range]::-webkit-slider-thumb {
+  background: #5cbf5c;
 }
 .playlist {
   list-style: none;
