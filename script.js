@@ -93,6 +93,7 @@ if (document.getElementById('gameCanvas')) {
     .filter(t => t.length > 0 && t.length < 15);
   const player = { x: 30, y: 110, w: 20, h: 20, vy: 0, sliding: false };
   const obstacles = [];
+  const fontSize = 24;
   let frame = 0;
   let score = 0;
   let best = parseInt(localStorage.getItem('highscore') || '0');
@@ -100,9 +101,10 @@ if (document.getElementById('gameCanvas')) {
   function spawn() {
     const high = Math.random() < 0.5;
     const text = texts[Math.floor(Math.random() * texts.length)] || 'TXT';
-    ctx.font = '16px sans-serif';
-    const w = ctx.measureText(text).width + 10;
-    obstacles.push({ x: canvas.width, y: high ? 80 : 120, w, h: 20, text });
+    ctx.font = fontSize + 'px sans-serif';
+    const h = fontSize * text.length;
+    const base = high ? 70 : 110;
+    obstacles.push({ x: canvas.width, y: base - h, w: fontSize, h, text });
   }
 
   document.addEventListener('keydown', e => {
@@ -145,7 +147,12 @@ if (document.getElementById('gameCanvas')) {
     ctx.fillRect(player.x, player.y, player.w, player.h);
     ctx.fillStyle = '#ff5555';
     obstacles.forEach(o => {
-      ctx.fillText(o.text, o.x, o.y);
+      ctx.save();
+      ctx.font = fontSize + 'px sans-serif';
+      for (let i = 0; i < o.text.length; i++) {
+        ctx.fillText(o.text[i], o.x, o.y + fontSize * (i + 1));
+      }
+      ctx.restore();
     });
     ctx.fillStyle = '#000';
     ctx.fillText('Score: ' + score + '  Best: ' + best, 10, 10);
