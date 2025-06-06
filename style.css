@@ -8,6 +8,13 @@ html {
   box-sizing: border-box;
   font-family: 'Noto Sans KR', sans-serif;
 }
+a {
+  color: inherit;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
 
 body.light {
   background: #fff;
@@ -251,6 +258,20 @@ body.light .fade-section {
   flex-direction: column;
   gap: 20px;
 }
+.dev-tabs {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+.dev-tabs button {
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.dev-content { display: none; margin-top: 20px; }
+.dev-content.active { display: block; }
+.calc-buttons button { width: 40px; height: 40px; margin: 2px; }
+.video-wrapper { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+.audio-player { margin-top: 20px; }
 .item {
   display: flex;
   align-items: center;

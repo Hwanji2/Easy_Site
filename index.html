@@ -50,15 +50,15 @@
 
   <section id="about" class="fade-section">
     <h2 class="section-title">About Me</h2>
-    <ul>
+    <div class="experience-block">
       <div class="item"><img src="https://via.placeholder.com/40" alt="venture"><p><strong>KUIT</strong> PM 4th</p></div>
-      <li><a href="https://github.com/Konkuk-KUIT/KUIT5_WEB-Frontend">KUIT Web 5th</a></li>
+      <div class="item"><a href="https://github.com/Konkuk-KUIT/KUIT5_WEB-Frontend">KUIT Web 5th</a></div>
       <div class="item"><img src="https://via.placeholder.com/40" alt="venture"><p><strong>KU-벤처</strong> 멤버</p></div>
       <div class="item"><img src="https://via.placeholder.com/40" alt="edge"><p><strong>EDGE</strong> 회계부</p></div>
       <div class="item"><img src="https://via.placeholder.com/40" alt="makers"><p><strong>메이커스팜</strong> 크루원</p></div>
       <div class="item"><img src="https://via.placeholder.com/40" alt="tutor"><p><strong>EDGE</strong> 개발 튜터</p></div>
-      <li>건국대학교 컴퓨터공학부 24</li>
-    </ul>
+      <div class="item">건국대학교 컴퓨터공학부 24</div>
+    </div>
   </section>
 
   <section id="contact" class="fade-section">
@@ -96,6 +96,27 @@
       <tr><th>C++</th><td>★★★☆☆</td></tr>
       <tr><th>Dart</th><td>★★☆☆☆</td></tr>
     </table>
+    <div class="dev-tabs">
+      <button data-target="game">점수 게임</button>
+      <button data-target="obj3d">3D 오브제</button>
+      <button data-target="calc">계산기</button>
+    </div>
+    <div id="game" class="dev-content">
+      <p id="score">0</p>
+      <button id="addScore">+1</button>
+    </div>
+    <div id="obj3d" class="dev-content">
+      <canvas id="cubeCanvas" width="300" height="200"></canvas>
+    </div>
+    <div id="calc" class="dev-content">
+      <input type="text" id="calcDisplay" readonly>
+      <div class="calc-buttons">
+        <button>7</button><button>8</button><button>9</button><button>/</button>
+        <button>4</button><button>5</button><button>6</button><button>*</button>
+        <button>1</button><button>2</button><button>3</button><button>-</button>
+        <button>0</button><button>=</button><button>C</button><button>+</button>
+      </div>
+    </div>
   </section>
 
   <section id="sound" class="fade-section">
@@ -103,6 +124,18 @@
     <div class="experience-block">
       <div class="item"><img src="https://via.placeholder.com/40"><p><strong>Fmod, LMMS</strong> – BGM 및 효과음 제작</p></div>
       <div class="item"><img src="https://via.placeholder.com/40"><p><strong>SynthV</strong> – AI보컬 믹싱</p></div>
+    </div>
+    <div class="video-wrapper">
+      <iframe width="360" height="203" src="https://www.youtube.com/embed/29NsomyXH20" title="YouTube video" frameborder="0" allowfullscreen></iframe>
+      <iframe width="360" height="203" src="https://www.youtube.com/embed/Y5xksEwKObc" title="YouTube video" frameborder="0" allowfullscreen></iframe>
+    </div>
+    <div class="audio-player">
+      <audio id="audio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" controls></audio>
+      <div class="controls">
+        Master <input type="range" id="masterVolume" min="0" max="1" step="0.01" value="1">
+        L <input type="range" id="leftVolume" min="0" max="1" step="0.01" value="1">
+        R <input type="range" id="rightVolume" min="0" max="1" step="0.01" value="1">
+      </div>
     </div>
   </section>
 
