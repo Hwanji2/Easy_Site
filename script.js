@@ -56,22 +56,31 @@ document.querySelectorAll('.dev-tabs button').forEach(btn => {
 });
 
 // 기획 페이지 넘기기
-const pages = document.querySelectorAll('#planning .page');
+const book = document.getElementById('book');
+const pages = book ? book.querySelectorAll('.page') : [];
 let pageIndex = 0;
-if (pages.length) {
-  const prev = document.getElementById('prevPage');
-  const next = document.getElementById('nextPage');
-  const show = idx => {
-    pages.forEach(p => p.classList.remove('active'));
-    pages[idx].classList.add('active');
+if (book && pages.length) {
+  const show = (idx, dir) => {
+    const current = pages[pageIndex];
+    const nextIdx = (idx + pages.length) % pages.length;
+    const next = pages[nextIdx];
+    current.classList.remove('active');
+    current.classList.add(dir === 'next' ? 'flip-next-out' : 'flip-prev-out');
+    next.classList.add('active', dir === 'next' ? 'flip-next-in' : 'flip-prev-in');
+    setTimeout(() => {
+      current.classList.remove('flip-next-out', 'flip-prev-out');
+      next.classList.remove('flip-next-in', 'flip-prev-in');
+    }, 600);
+    pageIndex = nextIdx;
   };
-  prev.addEventListener('click', () => {
-    pageIndex = (pageIndex - 1 + pages.length) % pages.length;
-    show(pageIndex);
-  });
-  next.addEventListener('click', () => {
-    pageIndex = (pageIndex + 1) % pages.length;
-    show(pageIndex);
+
+  book.addEventListener('click', e => {
+    const rect = book.getBoundingClientRect();
+    if (e.clientX - rect.left < rect.width / 2) {
+      show(pageIndex - 1, 'prev');
+    } else {
+      show(pageIndex + 1, 'next');
+    }
   });
 }
 
