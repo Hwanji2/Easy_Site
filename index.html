@@ -122,6 +122,7 @@
         <button>1</button><button>2</button><button>3</button><button>-</button>
         <button>0</button><button>=</button><button>C</button><button>+</button>
       </div>
+      <ul id="calcHistory" class="calc-history"></ul>
     </div>
   </section>
 
@@ -136,15 +137,22 @@
       <iframe width="360" height="203" src="https://www.youtube.com/embed/Y5xksEwKObc" title="YouTube video" frameborder="0" allowfullscreen></iframe>
     </div>
     <div class="audio-player">
-      <audio id="audio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+      <audio id="audio"></audio>
+      <button id="prevTrack">⏮</button>
       <button id="playPause">▶</button>
+      <button id="nextTrack">⏭</button>
       <div class="progress-bar-audio"><div class="progress"></div></div>
       <div class="controls">
-        Master <input type="range" id="masterVolume" min="0" max="1" step="0.01" value="1">
+        <input type="range" id="masterVolume" min="0" max="1" step="0.01" value="1">
         L <input type="range" id="leftVolume" min="0" max="1" step="0.01" value="1">
         R <input type="range" id="rightVolume" min="0" max="1" step="0.01" value="1">
       </div>
     </div>
+    <ul class="playlist">
+      <li data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" class="active">Track 1</li>
+      <li data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3">Track 2</li>
+      <li data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3">Track 3</li>
+    </ul>
   </section>
 
   <section id="art" class="fade-section">
