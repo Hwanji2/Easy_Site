@@ -106,8 +106,9 @@ if (document.getElementById('gameCanvas')) {
     const text = src.slice(0, len);
     ctx.font = fontSize + 'px sans-serif';
     const h = fontSize * text.length;
-    const base = high ? 70 : 110;
-    obstacles.push({ x: canvas.width, y: base - h, w: fontSize, h, text });
+    const w = ctx.measureText('M').width; // approximate character width
+    const base = high ? 90 : 130; // align with floor height at 130px
+    obstacles.push({ x: canvas.width, y: base - h, w, h, text });
   }
 
   document.addEventListener('keydown', e => {
