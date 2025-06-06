@@ -88,9 +88,10 @@ if (book && pages.length) {
 if (document.getElementById('gameCanvas')) {
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
+  ctx.textBaseline = 'top';
   const texts = Array.from(document.querySelectorAll('h2, p, li'))
     .map(el => el.textContent.trim())
-    .filter(t => t.length > 0 && t.length < 15);
+    .filter(t => t.length > 0);
   const player = { x: 30, y: 110, w: 20, h: 20, vy: 0, sliding: false };
   const obstacles = [];
   const fontSize = 24;
@@ -100,7 +101,9 @@ if (document.getElementById('gameCanvas')) {
 
   function spawn() {
     const high = Math.random() < 0.5;
-    const text = texts[Math.floor(Math.random() * texts.length)] || 'TXT';
+    const src = texts[Math.floor(Math.random() * texts.length)] || 'TXT';
+    const len = Math.min(Math.max(1, Math.floor(Math.random() * 3) + 1), src.length);
+    const text = src.slice(0, len);
     ctx.font = fontSize + 'px sans-serif';
     const h = fontSize * text.length;
     const base = high ? 70 : 110;
@@ -121,6 +124,31 @@ if (document.getElementById('gameCanvas')) {
       player.sliding = false;
       player.h = 20;
     }
+  });
+
+  // touch/mouse controls
+  canvas.style.touchAction = 'none';
+  let startY = null;
+  canvas.addEventListener('pointerdown', e => {
+    startY = e.clientY;
+  });
+  canvas.addEventListener('pointermove', e => {
+    if (startY !== null && e.clientY - startY > 30) {
+      player.sliding = true;
+      player.h = 10;
+    }
+  });
+  canvas.addEventListener('pointerup', e => {
+    if (startY !== null) {
+      const dy = e.clientY - startY;
+      if (dy > 30) {
+        player.sliding = false;
+        player.h = 20;
+      } else if (player.y >= 110 && !player.sliding) {
+        player.vy = -8;
+      }
+    }
+    startY = null;
   });
 
   function update() {
@@ -155,7 +183,7 @@ if (document.getElementById('gameCanvas')) {
       ctx.restore();
     });
     ctx.fillStyle = '#000';
-    ctx.fillText('Score: ' + score + '  Best: ' + best, 10, 10);
+    ctx.fillText('Score: ' + score + '  Best: ' + best, 10, 24);
     frame++;
     requestAnimationFrame(update);
   }
