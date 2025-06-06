@@ -281,10 +281,35 @@ body.light .fade-section {
 .dev-tabs button {
   padding: 6px 12px;
   cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(45deg, #3399ff, #66ccff);
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
+}
+.dev-tabs button:hover {
+  transform: translateY(-2px);
 }
 .dev-content { display: none; margin-top: 20px; }
 .dev-content.active { display: block; }
-.calc-buttons button { width: 40px; height: 40px; margin: 2px; }
+.calc-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 50px);
+  gap: 5px;
+  justify-content: center;
+  margin-top: 10px;
+}
+.calc-buttons button {
+  width: 50px;
+  height: 50px;
+  border: none;
+  border-radius: 4px;
+  background: #333;
+  color: #fff;
+  font-size: 1rem;
+}
+.calc-buttons button:hover { background: #555; }
 .video-wrapper { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
 .audio-player { margin-top: 20px; }
 .item {
@@ -362,17 +387,46 @@ body.light .skill-table td {
 }
 
 /* Planning pages */
-.planning-pages {
+.book {
   position: relative;
-  min-height: 60px;
-}
-.page { display: none; }
-.page.active { display: block; }
-.page-controls { text-align: center; margin-top: 10px; }
-.page-controls button {
-  padding: 4px 12px;
-  margin: 0 5px;
+  width: 300px;
+  height: 180px;
+  margin: 20px auto;
+  perspective: 1000px;
   cursor: pointer;
+}
+.page {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  color: #000;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  padding: 20px;
+  backface-visibility: hidden;
+  display: none;
+}
+.page.active { display: block; }
+.page.flip-next-out { animation: flipNextOut 0.6s forwards; }
+.page.flip-next-in { animation: flipNextIn 0.6s forwards; }
+.page.flip-prev-out { animation: flipPrevOut 0.6s forwards; }
+.page.flip-prev-in { animation: flipPrevIn 0.6s forwards; }
+
+@keyframes flipNextOut {
+  from { transform: rotateY(0); }
+  to { transform: rotateY(-180deg); }
+}
+@keyframes flipNextIn {
+  from { transform: rotateY(180deg); }
+  to { transform: rotateY(0); }
+}
+@keyframes flipPrevOut {
+  from { transform: rotateY(0); }
+  to { transform: rotateY(180deg); }
+}
+@keyframes flipPrevIn {
+  from { transform: rotateY(-180deg); }
+  to { transform: rotateY(0); }
 }
 
 /* Simple runner game */
