@@ -104,6 +104,15 @@ if (document.getElementById('gameCanvas')) {
   let best = parseInt(localStorage.getItem('highscore') || '0');
   const maxHearts = 3;
   let hearts = maxHearts;
+  const cardGameEl = document.getElementById('cardGame');
+  const cardGrid = document.getElementById('cardGrid');
+  const cardTimerEl = document.getElementById('cardTimer');
+  const linePuzzleEl = document.getElementById('linePuzzle');
+  const lineCanvas = document.getElementById('lineCanvas');
+  const lineCtx = lineCanvas ? lineCanvas.getContext('2d') : null;
+  const lineTimerEl = document.getElementById('lineTimer');
+  const breakPieces = [];
+  let linePuzzleStarted = false;
   const heartContainer = document.getElementById('heartContainer');
   const scoreDisplay = document.getElementById('scoreDisplay');
   const inventory = document.getElementById('inventory');
@@ -127,11 +136,128 @@ if (document.getElementById('gameCanvas')) {
     }
   }
   function updateScore() {
+    if (score > best) { best = score; localStorage.setItem("highscore", best); }
     if (scoreDisplay) {
       scoreDisplay.innerHTML =
         `<span class="score-block">Score: ${score}</span>` +
         `<span class="score-block">Best: ${best}</span>`;
     }
+  }
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  }
+
+  let cardTime = 30, cardInterval, firstCard = null, matched = 0;
+  function startCardGame() {
+    if (!cardGameEl) { running = true; update(); return; }
+    running = false;
+    cardTime = 30;
+    matched = 0;
+    cardGrid.innerHTML = '';
+    const values = texts.slice(0, 8);
+    const cards = values.concat(values);
+    shuffle(cards);
+    cards.forEach(v => {
+      const c = document.createElement('div');
+      c.className = 'card';
+      c.dataset.val = v;
+      c.innerHTML = `<div class="inner"><div class="front"></div><div class="back">${v}</div></div>`;
+      c.addEventListener('click', onCardClick);
+      cardGrid.appendChild(c);
+    });
+    cardTimerEl.textContent = cardTime;
+    cardGameEl.classList.remove('hidden');
+    cardInterval = setInterval(() => {
+      cardTime--; cardTimerEl.textContent = cardTime;
+      if (cardTime <= 0) endCardGame();
+    }, 1000);
+  }
+
+  function onCardClick(e) {
+    const card = e.currentTarget;
+    if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
+    card.classList.add('flipped');
+    if (!firstCard) { firstCard = card; return; }
+    if (firstCard.dataset.val === card.dataset.val) {
+      firstCard.classList.add('matched');
+      card.classList.add('matched');
+      matched += 2;
+      cardTime += 3;
+      cardTimerEl.textContent = cardTime;
+    } else {
+      const a = firstCard; const b = card;
+      setTimeout(() => { a.classList.remove('flipped'); b.classList.remove('flipped'); }, 600);
+    }
+    firstCard = null;
+    if (matched >= 16) endCardGame();
+  }
+
+  function endCardGame() {
+    clearInterval(cardInterval);
+    if (cardGameEl) cardGameEl.classList.add('hidden');
+    running = true;
+    update();
+  }
+
+  let lineTime = 15, lineInterval, lines = [], currentLine = null;
+  const nodes = lineCanvas ? [
+    {x:50,y:40,color:'red'}, {x:310,y:40,color:'red'},
+    {x:50,y:120,color:'blue'}, {x:310,y:120,color:'blue'}
+  ] : [];
+
+  function drawLinePuzzle() {
+    if (!lineCtx) return;
+    lineCtx.clearRect(0,0,lineCanvas.width,lineCanvas.height);
+    nodes.forEach(n=>{ lineCtx.fillStyle=n.color; lineCtx.beginPath(); lineCtx.arc(n.x,n.y,8,0,Math.PI*2); lineCtx.fill(); });
+    lineCtx.strokeStyle='#0f0'; lineCtx.lineWidth=2;
+    lines.forEach(l=>{ lineCtx.beginPath(); lineCtx.moveTo(l.x1,l.y1); lineCtx.lineTo(l.x2,l.y2); lineCtx.stroke(); });
+    if (currentLine) { lineCtx.beginPath(); lineCtx.moveTo(currentLine.x1,currentLine.y1); lineCtx.lineTo(currentLine.x2,currentLine.y2); lineCtx.stroke(); }
+  }
+
+  function startLinePuzzle() {
+    if (!linePuzzleEl) return;
+    running = false;
+    lineTime = 15; lines = []; currentLine = null;
+    linePuzzleEl.classList.remove('hidden');
+    drawLinePuzzle();
+    lineTimerEl.textContent = lineTime;
+    lineInterval = setInterval(() => { lineTime--; lineTimerEl.textContent = lineTime; if (lineTime <= 0) endLinePuzzle(false); }, 1000);
+  }
+
+  function doLinesCross(l1,l2){
+    function ccw(ax,ay,bx,by,cx,cy){ return (bx-ax)*(cy-ay)-(by-ay)*(cx-ax); }
+    return ccw(l1.x1,l1.y1,l1.x2,l1.y2,l2.x1,l2.y1)*ccw(l1.x1,l1.y1,l1.x2,l1.y2,l2.x2,l2.y2)<0 &&
+           ccw(l2.x1,l2.y1,l2.x2,l2.y2,l1.x1,l1.y1)*ccw(l2.x1,l2.y1,l2.x2,l2.y2,l1.x2,l1.y2)<0;
+  }
+
+  function endLinePuzzle(success){
+    clearInterval(lineInterval);
+    if (linePuzzleEl) linePuzzleEl.classList.add('hidden');
+    if (success) { score += 5; updateScore(); }
+    running = true;
+    update();
+  }
+
+  if (lineCanvas) {
+    lineCanvas.addEventListener('pointerdown', e=>{
+      const r=lineCanvas.getBoundingClientRect();
+      const x=e.clientX-r.left, y=e.clientY-r.top;
+      const n=nodes.find(nd=>Math.hypot(nd.x-x,nd.y-y)<10 && !lines.find(l=>l.color===nd.color));
+      if(n){ currentLine={color:n.color,x1:n.x,y1:n.y,x2:n.x,y2:n.y}; drawLinePuzzle(); }
+    });
+    lineCanvas.addEventListener('pointermove', e=>{
+      if(!currentLine) return; const r=lineCanvas.getBoundingClientRect(); currentLine.x2=e.clientX-r.left; currentLine.y2=e.clientY-r.top; drawLinePuzzle();
+    });
+    lineCanvas.addEventListener('pointerup', e=>{
+      if(!currentLine) return; const r=lineCanvas.getBoundingClientRect(); const x=e.clientX-r.left, y=e.clientY-r.top;
+      const t=nodes.find(nd=>nd.color===currentLine.color && Math.hypot(nd.x-x,nd.y-y)<10 && !(nd.x===currentLine.x1 && nd.y===currentLine.y1));
+      if(t){ currentLine.x2=t.x; currentLine.y2=t.y; lines.push({...currentLine}); }
+      currentLine=null; drawLinePuzzle();
+      if(lines.length===2 && !doLinesCross(lines[0],lines[1])) endLinePuzzle(true);
+    });
   }
   renderHearts();
   updateScore();
@@ -293,6 +419,11 @@ if (document.getElementById('gameCanvas')) {
       spawnRunningItem();
       runningTimeSpawned = true;
     }
+    if (score >= 20 && !linePuzzleStarted) {
+      linePuzzleStarted = true;
+      startLinePuzzle();
+      return;
+    }
     obstacles.forEach(o => o.x -= (2 + boost) * scale);
     if (obstacles.length && obstacles[0].x + obstacles[0].w < 0) { obstacles.shift(); score++; updateScore(); }
 
@@ -326,6 +457,14 @@ if (document.getElementById('gameCanvas')) {
           }
           continue;
         } else {
+          if (o.type === 'text') {
+            for (let j = 0; j < o.text.length; j++) {
+              breakPieces.push({
+                char: o.text[j], x: o.x, y: o.y + fontSize * (j + 1),
+                vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 1) * 2, a: 1
+              });
+            }
+          }
           obstacles.splice(i, 1);
           canvas.classList.add('shake');
           setTimeout(() => canvas.classList.remove('shake'), 300);
@@ -367,6 +506,17 @@ if (document.getElementById('gameCanvas')) {
     ctx.fillStyle = '#000';
     ctx.font = "12px 'Press Start 2P', monospace";
     ctx.fillText('Score: ' + score + '  Best: ' + best, 10, 24);
+    for (let i = breakPieces.length - 1; i >= 0; i--) {
+      const p = breakPieces[i];
+      p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.a -= 0.02;
+      if (p.a <= 0) { breakPieces.splice(i,1); continue; }
+      ctx.save();
+      ctx.globalAlpha = p.a;
+      ctx.fillStyle = '#ff5555';
+      ctx.font = fontSize + "px 'Press Start 2P', monospace";
+      ctx.fillText(p.char, p.x, p.y);
+      ctx.restore();
+    }
     frame++;
     requestAnimationFrame(update);
   }
@@ -381,16 +531,18 @@ if (document.getElementById('gameCanvas')) {
     decel = false;
     runningTimeSpawned = false;
     runningTimeAcquired = false;
+    linePuzzleStarted = false;
+    breakPieces.length = 0;
     if (inventory) inventory.innerHTML = '';
     renderHearts();
     updateScore();
     if (gameOverEl) gameOverEl.classList.add('hidden');
     running = true;
-    update();
+    startCardGame();
   }
   if (restartBtn) restartBtn.addEventListener('click', restartGame);
 
-  update();
+  startCardGame();
 }
 
 // 오디오 볼륨 제어
