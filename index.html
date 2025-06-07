@@ -110,11 +110,17 @@
     </div>
     <div id="game" class="dev-content">
       <div class="game-wrapper">
-        <canvas id="gameCanvas" width="360" height="160"></canvas>
-        <div id="heartContainer" class="heart-container"></div>
-        <div id="gameOver" class="game-over hidden">
-          <div id="finalScore"></div>
-          <button id="restartBtn">다시 시작</button>
+        <div class="game-area">
+          <canvas id="gameCanvas" width="360" height="160"></canvas>
+          <div id="gameOver" class="game-over hidden">
+            <div id="finalScore"></div>
+            <button id="restartBtn">다시 시작</button>
+          </div>
+        </div>
+        <div class="side-ui">
+          <div id="scoreDisplay" class="score-display"></div>
+          <div id="heartContainer" class="heart-container"></div>
+          <div id="inventory" class="inventory"></div>
         </div>
       </div>
       <p class="game-instr">←→ 이동, ↑ 또는 스페이스바로 점프, ↓로 슬라이드/빠른 낙하!</p>
