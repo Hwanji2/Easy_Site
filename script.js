@@ -205,12 +205,14 @@ if (document.getElementById('gameCanvas')) {
       cardGrid.appendChild(c);
     });
     cardTimerEl.textContent = cardTime;
+    cardTimerEl.classList.add('hidden');
     if (cardStartMsg) cardStartMsg.classList.remove('hidden');
     cardGameEl.classList.remove('hidden');
     const startHandler = () => {
       if (cardStarted) return;
       cardStarted = true;
       if (cardStartMsg) cardStartMsg.classList.add('hidden');
+      cardTimerEl.classList.remove('hidden');
       cardGrid.querySelectorAll('.card').forEach(cd => cd.classList.remove('flipped'));
       cardInterval = setInterval(() => {
         cardTime--; cardTimerEl.textContent = cardTime;
@@ -220,8 +222,7 @@ if (document.getElementById('gameCanvas')) {
         }
       }, 1000);
     };
-    document.addEventListener('pointerdown', startHandler, { once: true });
-    document.addEventListener('keydown', startHandler, { once: true });
+    cardGameEl.addEventListener('pointerdown', startHandler, { once: true });
   }
 
   function onCardClick(e) {

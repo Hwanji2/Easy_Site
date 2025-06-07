@@ -114,7 +114,6 @@
           <canvas id="gameCanvas" width="360" height="160"></canvas>
           <div id="cardGame" class="overlay hidden">
             <div id="cardStartMsg" class="start-msg">아무 곳이나 누르면 시작</div>
-            <div id="cardTimer" class="timer"></div>
             <div id="cardGrid" class="card-grid"></div>
           </div>
           <div id="linePuzzle" class="overlay hidden">
@@ -131,7 +130,10 @@
         </div>
         <div class="side-ui">
           <div id="scoreDisplay" class="score-display"></div>
-          <div id="heartContainer" class="heart-container"></div>
+          <div class="heart-row">
+            <div id="heartContainer" class="heart-container"></div>
+            <div id="cardTimer" class="timer hidden"></div>
+          </div>
           <div id="inventory" class="inventory"></div>
         </div>
       </div>
