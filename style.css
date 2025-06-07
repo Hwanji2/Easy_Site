@@ -446,7 +446,7 @@ body.light .skill-table td {
 .game-wrapper { position: relative; display: inline-block; }
 .heart-container {
   position: absolute;
-  top: 4px;
+  top: 24px;
   left: 4px;
   display: flex;
   gap: 4px;

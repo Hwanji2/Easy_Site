@@ -93,6 +93,11 @@ if (document.getElementById('gameCanvas')) {
     .map(el => el.textContent.trim())
     .filter(t => t.length > 0);
   const player = { x: 30, y: 110, w: 20, h: 20, vy: 0, sliding: false };
+  let jumpActive = false;
+  let jumpTimer = 0;
+  const maxJumpTime = 15;
+  let canDouble = false;
+  let wantSlide = false;
   const obstacles = [];
   const fontSize = 24;
   let frame = 0;
@@ -112,7 +117,7 @@ if (document.getElementById('gameCanvas')) {
     for (let i = 0; i < hearts; i++) {
       const span = document.createElement('span');
       span.className = 'heart';
-      span.textContent = '❤️';
+      span.textContent = '💙';
       heartContainer.appendChild(span);
     }
   }
@@ -133,9 +138,20 @@ if (document.getElementById('gameCanvas')) {
   const keys = {};
   document.addEventListener('keydown', e => {
     keys[e.code] = true;
-    if ((e.code === 'Space' || e.code === 'ArrowUp') && player.y >= 110 && !player.sliding) {
-      const scale = 1 + Math.min(score / 100, 2);
-      player.vy = -10 * scale;
+    if (e.code === 'Space' || e.code === 'ArrowUp') {
+      if (player.y >= 110 && !player.sliding) {
+        const scale = 1 + Math.min(score / 100, 2);
+        player.vy = -10 * scale;
+        jumpActive = true;
+        jumpTimer = 0;
+        canDouble = true;
+      } else if (canDouble) {
+        const scale = 1 + Math.min(score / 100, 2);
+        player.vy = -10 * scale;
+        jumpActive = true;
+        jumpTimer = 0;
+        canDouble = false;
+      }
     }
     if (e.code === 'ArrowDown') {
       if (player.y >= 110) {
@@ -144,6 +160,7 @@ if (document.getElementById('gameCanvas')) {
         player.y = 120;
       } else {
         player.vy = Math.max(player.vy, 8);
+        wantSlide = true;
       }
     }
   });
@@ -154,37 +171,48 @@ if (document.getElementById('gameCanvas')) {
       player.h = 20;
       player.y = 110;
     }
+    if (e.code === 'Space' || e.code === 'ArrowUp') {
+      jumpActive = false;
+    }
   });
 
   // touch/mouse controls
   canvas.style.touchAction = 'none';
   let startY = null;
+  let touchHeld = false;
   canvas.addEventListener('pointerdown', e => {
     startY = e.clientY;
-  });
-  canvas.addEventListener('pointermove', e => {
-    if (startY !== null && e.clientY - startY > 30) {
-      if (player.y >= 110) {
-        player.sliding = true;
-        player.h = 10;
-        player.y = 120;
-      } else {
-        player.vy = Math.max(player.vy, 8);
-      }
-    }
+    touchHeld = true;
   });
   canvas.addEventListener('pointerup', e => {
     if (startY !== null) {
       const dy = e.clientY - startY;
       if (dy > 30) {
-        player.sliding = false;
-        player.h = 20;
-        player.y = 110;
-      } else if (player.y >= 110 && !player.sliding) {
+        if (player.y >= 110) {
+          player.sliding = true;
+          player.h = 10;
+          player.y = 120;
+        } else {
+          player.vy = Math.max(player.vy, 8);
+          wantSlide = true;
+        }
+      } else {
         const scale = 1 + Math.min(score / 100, 2);
-        player.vy = -10 * scale;
+        if (player.y >= 110 && !player.sliding) {
+          player.vy = -10 * scale;
+          jumpActive = true;
+          jumpTimer = 0;
+          canDouble = true;
+        } else if (canDouble) {
+          player.vy = -10 * scale;
+          jumpActive = true;
+          jumpTimer = 0;
+          canDouble = false;
+        }
       }
     }
+    touchHeld = false;
+    jumpActive = false;
     startY = null;
   });
 
@@ -209,10 +237,24 @@ if (document.getElementById('gameCanvas')) {
     const scale = 1 + Math.min(score / 100, 2);
     if (keys['ArrowLeft']) player.x = Math.max(0, player.x - 2 * scale);
     if (keys['ArrowRight']) player.x = Math.min(canvas.width - player.w, player.x + 2 * scale);
+    if (jumpActive && (keys['Space'] || keys['ArrowUp'] || touchHeld) && jumpTimer < maxJumpTime && player.vy < 0) {
+      player.vy -= 0.4 * scale;
+      jumpTimer++;
+    }
     player.vy += 0.4 * scale;
     player.y += player.vy;
     const floorY = player.sliding ? 120 : 110;
-    if (player.y > floorY) { player.y = floorY; player.vy = 0; }
+    if (player.y > floorY) {
+      player.y = floorY;
+      player.vy = 0;
+      if (wantSlide) {
+        player.sliding = true;
+        player.h = 10;
+        player.y = 120;
+        wantSlide = false;
+      }
+      canDouble = false;
+    }
 
     if (frame % Math.max(100 - score, 40) === 0) spawn();
     obstacles.forEach(o => o.x -= 2 * scale);
@@ -251,6 +293,11 @@ if (document.getElementById('gameCanvas')) {
     ctx.fillStyle = '#000';
     ctx.font = "12px 'Press Start 2P', monospace";
     ctx.fillText('Score: ' + score + '  Best: ' + best, 10, 24);
+    if (heartContainer) {
+      const w = ctx.measureText('Score: ' + score + '  Best: ' + best).width;
+      heartContainer.style.left = (10 + w + 10) + 'px';
+      heartContainer.style.top = '24px';
+    }
     frame++;
     requestAnimationFrame(update);
   }
