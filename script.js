@@ -104,7 +104,7 @@ if (document.getElementById('gameCanvas')) {
     const src = texts[Math.floor(Math.random() * texts.length)] || 'TXT';
     const len = Math.min(Math.max(1, Math.floor(Math.random() * 3) + 1), src.length);
     const text = src.slice(0, len);
-    ctx.font = fontSize + 'px sans-serif';
+    ctx.font = fontSize + "px 'Press Start 2P', monospace";
     const h = fontSize * text.length;
     const w = ctx.measureText('M').width; // approximate character width
     const base = high ? 90 : 130; // align with floor height at 130px
@@ -115,18 +115,21 @@ if (document.getElementById('gameCanvas')) {
   document.addEventListener('keydown', e => {
     keys[e.code] = true;
     if ((e.code === 'Space' || e.code === 'ArrowUp') && player.y >= 110 && !player.sliding) {
-      player.vy = -10; // higher initial jump velocity
+      const scale = 1 + Math.min(score / 100, 2);
+      player.vy = -10 * scale;
     }
-    if (e.code === 'ArrowDown') {
+    if (e.code === 'ArrowDown' && player.y >= 110) {
       player.sliding = true;
       player.h = 10;
+      player.y = 120;
     }
   });
   document.addEventListener('keyup', e => {
     keys[e.code] = false;
-    if (e.code === 'ArrowDown') {
+    if (e.code === 'ArrowDown' && player.sliding) {
       player.sliding = false;
       player.h = 20;
+      player.y = 110;
     }
   });
 
@@ -140,6 +143,7 @@ if (document.getElementById('gameCanvas')) {
     if (startY !== null && e.clientY - startY > 30) {
       player.sliding = true;
       player.h = 10;
+      player.y = 120;
     }
   });
   canvas.addEventListener('pointerup', e => {
@@ -148,8 +152,10 @@ if (document.getElementById('gameCanvas')) {
       if (dy > 30) {
         player.sliding = false;
         player.h = 20;
+        player.y = 110;
       } else if (player.y >= 110 && !player.sliding) {
-        player.vy = -10; // higher initial jump velocity
+        const scale = 1 + Math.min(score / 100, 2);
+        player.vy = -10 * scale;
       }
     }
     startY = null;
@@ -157,14 +163,16 @@ if (document.getElementById('gameCanvas')) {
 
   function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (keys['ArrowLeft']) player.x = Math.max(0, player.x - 2);
-    if (keys['ArrowRight']) player.x = Math.min(canvas.width - player.w, player.x + 2);
-    player.vy += 0.4; // slightly reduced gravity for longer hang time
+    const scale = 1 + Math.min(score / 100, 2);
+    if (keys['ArrowLeft']) player.x = Math.max(0, player.x - 2 * scale);
+    if (keys['ArrowRight']) player.x = Math.min(canvas.width - player.w, player.x + 2 * scale);
+    player.vy += 0.4 * scale;
     player.y += player.vy;
-    if (player.y > 110) { player.y = 110; player.vy = 0; }
+    const floorY = player.sliding ? 120 : 110;
+    if (player.y > floorY) { player.y = floorY; player.vy = 0; }
 
-    if (frame % 100 === 0) spawn();
-    obstacles.forEach(o => o.x -= 2);
+    if (frame % Math.max(100 - score, 40) === 0) spawn();
+    obstacles.forEach(o => o.x -= 2 * scale);
     if (obstacles.length && obstacles[0].x + obstacles[0].w < 0) { obstacles.shift(); score++; }
 
     obstacles.forEach(o => {
@@ -172,6 +180,8 @@ if (document.getElementById('gameCanvas')) {
           player.y < o.y + o.h && player.y + player.h > o.y) {
         if (score > best) { best = score; localStorage.setItem('highscore', best); }
         score = 0; obstacles.length = 0; o.x = canvas.width;
+        canvas.classList.add('shake');
+        setTimeout(() => canvas.classList.remove('shake'), 300);
       }
     });
 
@@ -182,13 +192,14 @@ if (document.getElementById('gameCanvas')) {
     ctx.fillStyle = '#ff5555';
     obstacles.forEach(o => {
       ctx.save();
-      ctx.font = fontSize + 'px sans-serif';
+      ctx.font = fontSize + "px 'Press Start 2P', monospace";
       for (let i = 0; i < o.text.length; i++) {
         ctx.fillText(o.text[i], o.x, o.y + fontSize * (i + 1));
       }
       ctx.restore();
     });
     ctx.fillStyle = '#000';
+    ctx.font = "12px 'Press Start 2P', monospace";
     ctx.fillText('Score: ' + score + '  Best: ' + best, 10, 24);
     frame++;
     requestAnimationFrame(update);

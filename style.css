@@ -440,8 +440,20 @@ body.light .skill-table td {
   background: linear-gradient(#e8f4ff, #bcd4ff);
   border: 1px solid #8ab4f8;
   border-radius: 4px;
+  font-family: 'Press Start 2P', monospace;
+  image-rendering: pixelated;
 }
 .game-instr { margin-top: 5px; font-size: 0.9rem; }
+
+.shake {
+  animation: shake 0.3s;
+}
+@keyframes shake {
+  0%,100% { transform: translate(0); }
+  25% { transform: translate(-5px, 0); }
+  50% { transform: translate(5px, 0); }
+  75% { transform: translate(-5px, 0); }
+}
 
 /* Custom audio player */
 .audio-player {
