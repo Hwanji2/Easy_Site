@@ -27,6 +27,10 @@ body.dark {
   font-family: "Courier New", monospace;
 }
 
+.hidden {
+  display: none !important;
+}
+
 /* 진행도 바 */
 .progress-bar {
   position: fixed;
@@ -255,7 +259,7 @@ body.light .fade-section {
   border-left: 6px solid #fff;
   padding-left: 15px;
 }
-body.light .section-title {
+body.light .section-title:not(.red):not(.blue):not(.green):not(.gold) {
   border-left-color: #000;
 }
 .section-title.red {
@@ -472,6 +476,12 @@ body.light #gameCanvas {
   display: flex;
   gap: 4px;
 }
+.heart-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+}
 .score-block {
   padding: 4px 6px;
   background: rgba(0, 0, 0, 0.3);
@@ -566,6 +576,11 @@ body.light .card-grid .card { background: #fff; border-color: #87ceeb; }
   background: #028;
 }
 .timer { margin-bottom: 10px; }
+#cardTimer {
+  margin-left: 4px;
+  margin-bottom: 0;
+  font-family: 'Press Start 2P', monospace;
+}
 #lineCanvas { background: #111; border: 1px solid #87ceeb; }
 body.light #lineCanvas { background: #eee; border-color: #87ceeb; }
 
