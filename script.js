@@ -89,7 +89,7 @@ if (document.getElementById('gameCanvas')) {
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
   ctx.textBaseline = 'top';
-  const texts = Array.from(document.querySelectorAll('h2, p, li'))
+  const texts = Array.from(document.querySelectorAll('#about .item'))
     .map(el => el.textContent.trim())
     .filter(t => t.length > 0);
   const player = { x: 30, y: 110, w: 20, h: 20, vy: 0, sliding: false };
@@ -150,15 +150,40 @@ if (document.getElementById('gameCanvas')) {
     }
   }
 
-  let cardTime = 30, cardInterval, firstCard = null, matched = 0;
+  function showGood() {
+    if (!cardGameEl) return;
+    const el = document.createElement('div');
+    el.className = 'good-effect';
+    el.textContent = 'Good!';
+    cardGameEl.appendChild(el);
+    setTimeout(() => el.remove(), 800);
+  }
+
+  function explodeCanvas() {
+    for (let i = 0; i < 20; i++) {
+      breakPieces.push({
+        char: '💥',
+        x: Math.random() * canvas.width,
+        y: Math.random() * 80,
+        vx: (Math.random() - 0.5) * 4,
+        vy: (Math.random() - 0.5) * 4,
+        a: 1
+      });
+    }
+    canvas.classList.add('shake');
+    setTimeout(() => canvas.classList.remove('shake'), 600);
+  }
+
+  let cardTime = 30, cardInterval, firstCard = null, matched = 0, totalCards = 0;
   function startCardGame() {
     if (!cardGameEl) { running = true; update(); return; }
     running = false;
     cardTime = 30;
     matched = 0;
     cardGrid.innerHTML = '';
-    const values = texts.slice(0, 8);
+    const values = texts.slice(0);
     const cards = values.concat(values);
+    totalCards = cards.length;
     shuffle(cards);
     cards.forEach(v => {
       const c = document.createElement('div');
@@ -172,7 +197,10 @@ if (document.getElementById('gameCanvas')) {
     cardGameEl.classList.remove('hidden');
     cardInterval = setInterval(() => {
       cardTime--; cardTimerEl.textContent = cardTime;
-      if (cardTime <= 0) endCardGame();
+      if (cardTime <= 0) {
+        explodeCanvas();
+        endCardGame();
+      }
     }, 1000);
   }
 
@@ -187,12 +215,13 @@ if (document.getElementById('gameCanvas')) {
       matched += 2;
       cardTime += 3;
       cardTimerEl.textContent = cardTime;
+      showGood();
     } else {
       const a = firstCard; const b = card;
       setTimeout(() => { a.classList.remove('flipped'); b.classList.remove('flipped'); }, 600);
     }
     firstCard = null;
-    if (matched >= 16) endCardGame();
+    if (matched >= totalCards) endCardGame();
   }
 
   function endCardGame() {
@@ -212,7 +241,7 @@ if (document.getElementById('gameCanvas')) {
     if (!lineCtx) return;
     lineCtx.clearRect(0,0,lineCanvas.width,lineCanvas.height);
     nodes.forEach(n=>{ lineCtx.fillStyle=n.color; lineCtx.beginPath(); lineCtx.arc(n.x,n.y,8,0,Math.PI*2); lineCtx.fill(); });
-    lineCtx.strokeStyle='#0f0'; lineCtx.lineWidth=2;
+    lineCtx.strokeStyle='#87ceeb'; lineCtx.lineWidth=2;
     lines.forEach(l=>{ lineCtx.beginPath(); lineCtx.moveTo(l.x1,l.y1); lineCtx.lineTo(l.x2,l.y2); lineCtx.stroke(); });
     if (currentLine) { lineCtx.beginPath(); lineCtx.moveTo(currentLine.x1,currentLine.y1); lineCtx.lineTo(currentLine.x2,currentLine.y2); lineCtx.stroke(); }
   }
@@ -224,7 +253,10 @@ if (document.getElementById('gameCanvas')) {
     linePuzzleEl.classList.remove('hidden');
     drawLinePuzzle();
     lineTimerEl.textContent = lineTime;
-    lineInterval = setInterval(() => { lineTime--; lineTimerEl.textContent = lineTime; if (lineTime <= 0) endLinePuzzle(false); }, 1000);
+    lineInterval = setInterval(() => {
+      lineTime--; lineTimerEl.textContent = lineTime;
+      if (lineTime <= 0) { explodeCanvas(); endLinePuzzle(false); }
+    }, 1000);
   }
 
   function doLinesCross(l1,l2){
