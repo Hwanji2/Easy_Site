@@ -310,7 +310,14 @@ body.light .fade-section {
   font-size: 1rem;
 }
 .calc-buttons button:hover { background: #555; }
-.video-wrapper { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+.video-wrapper {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+.video-wrapper iframe { flex: 0 0 auto; }
 .item {
   display: flex;
   align-items: center;
