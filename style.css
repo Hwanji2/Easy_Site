@@ -443,6 +443,34 @@ body.light .skill-table td {
   font-family: 'Press Start 2P', monospace;
   image-rendering: pixelated;
 }
+.game-wrapper { position: relative; display: inline-block; }
+.heart-container {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  display: flex;
+  gap: 4px;
+  pointer-events: none;
+  font-size: 18px;
+}
+.heart { transition: transform 0.3s, opacity 0.3s; }
+.heart.fall { animation: heart-fall 0.6s forwards; }
+@keyframes heart-fall {
+  to { transform: translateY(20px); opacity: 0; }
+}
+.game-over {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  font-family: 'Press Start 2P', monospace;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.game-over button { margin-top: 10px; padding: 6px 12px; }
+.game-over.hidden { display: none; }
 .game-instr { margin-top: 5px; font-size: 0.9rem; }
 
 .shake {
