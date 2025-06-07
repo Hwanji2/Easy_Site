@@ -107,12 +107,16 @@ if (document.getElementById('gameCanvas')) {
   const cardGameEl = document.getElementById('cardGame');
   const cardGrid = document.getElementById('cardGrid');
   const cardTimerEl = document.getElementById('cardTimer');
+  const cardStartMsg = document.getElementById('cardStartMsg');
   const linePuzzleEl = document.getElementById('linePuzzle');
   const lineCanvas = document.getElementById('lineCanvas');
   const lineCtx = lineCanvas ? lineCanvas.getContext('2d') : null;
   const lineTimerEl = document.getElementById('lineTimer');
+  const reactionGameEl = document.getElementById('reactionGame');
+  const reactionMsg = document.getElementById('reactionMsg');
   const breakPieces = [];
   let linePuzzleStarted = false;
+  let reactionGameStarted = false;
   const heartContainer = document.getElementById('heartContainer');
   const scoreDisplay = document.getElementById('scoreDisplay');
   const inventory = document.getElementById('inventory');
@@ -124,6 +128,10 @@ if (document.getElementById('gameCanvas')) {
   let runningTimeAcquired = false;
   let boost = 0;
   let decel = false;
+  let reactionActive = false;
+  let reactionTimeout;
+  let reactionTimer;
+  let reactionStart = 0;
 
   function renderHearts() {
     if (!heartContainer) return;
@@ -175,11 +183,13 @@ if (document.getElementById('gameCanvas')) {
   }
 
   let cardTime = 30, cardInterval, firstCard = null, matched = 0, totalCards = 0;
+  let cardStarted = false;
   function startCardGame() {
     if (!cardGameEl) { running = true; update(); return; }
     running = false;
     cardTime = 30;
     matched = 0;
+    cardStarted = false;
     cardGrid.innerHTML = '';
     const values = texts.slice(0);
     const cards = values.concat(values);
@@ -191,17 +201,27 @@ if (document.getElementById('gameCanvas')) {
       c.dataset.val = v;
       c.innerHTML = `<div class="inner"><div class="front"></div><div class="back">${v}</div></div>`;
       c.addEventListener('click', onCardClick);
+      c.classList.add('flipped');
       cardGrid.appendChild(c);
     });
     cardTimerEl.textContent = cardTime;
+    if (cardStartMsg) cardStartMsg.classList.remove('hidden');
     cardGameEl.classList.remove('hidden');
-    cardInterval = setInterval(() => {
-      cardTime--; cardTimerEl.textContent = cardTime;
-      if (cardTime <= 0) {
-        explodeCanvas();
-        endCardGame();
-      }
-    }, 1000);
+    const startHandler = () => {
+      if (cardStarted) return;
+      cardStarted = true;
+      if (cardStartMsg) cardStartMsg.classList.add('hidden');
+      cardGrid.querySelectorAll('.card').forEach(cd => cd.classList.remove('flipped'));
+      cardInterval = setInterval(() => {
+        cardTime--; cardTimerEl.textContent = cardTime;
+        if (cardTime <= 0) {
+          explodeCanvas();
+          endCardGame();
+        }
+      }, 1000);
+    };
+    document.addEventListener('pointerdown', startHandler, { once: true });
+    document.addEventListener('keydown', startHandler, { once: true });
   }
 
   function onCardClick(e) {
@@ -215,6 +235,8 @@ if (document.getElementById('gameCanvas')) {
       matched += 2;
       cardTime += 3;
       cardTimerEl.textContent = cardTime;
+      score += 1;
+      updateScore();
       showGood();
     } else {
       const a = firstCard; const b = card;
@@ -244,6 +266,9 @@ if (document.getElementById('gameCanvas')) {
     lineCtx.strokeStyle='#87ceeb'; lineCtx.lineWidth=2;
     lines.forEach(l=>{ lineCtx.beginPath(); lineCtx.moveTo(l.x1,l.y1); lineCtx.lineTo(l.x2,l.y2); lineCtx.stroke(); });
     if (currentLine) { lineCtx.beginPath(); lineCtx.moveTo(currentLine.x1,currentLine.y1); lineCtx.lineTo(currentLine.x2,currentLine.y2); lineCtx.stroke(); }
+    lineCtx.fillStyle = '#87ceeb';
+    lineCtx.font = "16px 'Press Start 2P', monospace";
+    lineCtx.fillText(lineTime, lineCanvas.width - 30, 20);
   }
 
   function startLinePuzzle() {
@@ -252,9 +277,8 @@ if (document.getElementById('gameCanvas')) {
     lineTime = 15; lines = []; currentLine = null;
     linePuzzleEl.classList.remove('hidden');
     drawLinePuzzle();
-    lineTimerEl.textContent = lineTime;
     lineInterval = setInterval(() => {
-      lineTime--; lineTimerEl.textContent = lineTime;
+      lineTime--; drawLinePuzzle();
       if (lineTime <= 0) { explodeCanvas(); endLinePuzzle(false); }
     }, 1000);
   }
@@ -290,6 +314,40 @@ if (document.getElementById('gameCanvas')) {
       currentLine=null; drawLinePuzzle();
       if(lines.length===2 && !doLinesCross(lines[0],lines[1])) endLinePuzzle(true);
     });
+  }
+
+  function startReactionGame() {
+    if (!reactionGameEl) return;
+    running = false;
+    reactionActive = false;
+    reactionGameEl.style.background = 'rgba(0,0,0,0.8)';
+    if (reactionMsg) reactionMsg.textContent = '화면이 빨개지면 클릭!';
+    reactionGameEl.classList.remove('hidden');
+    reactionTimeout = setTimeout(() => {
+      reactionGameEl.style.background = 'rgba(255,0,0,0.9)';
+      reactionActive = true;
+      reactionStart = performance.now();
+      reactionTimer = setTimeout(() => { if(reactionActive) { explodeCanvas(); endReactionGame(); } }, 1000);
+    }, 1000 + Math.random() * 2000);
+    reactionGameEl.addEventListener('pointerdown', onReactionClick);
+  }
+
+  function onReactionClick() {
+    if (!reactionActive) return;
+    const elapsed = performance.now() - reactionStart;
+    clearTimeout(reactionTimer);
+    if (elapsed <= 1000) { score += 2; updateScore(); }
+    else { explodeCanvas(); }
+    endReactionGame();
+  }
+
+  function endReactionGame() {
+    clearTimeout(reactionTimeout);
+    clearTimeout(reactionTimer);
+    reactionGameEl.removeEventListener('pointerdown', onReactionClick);
+    reactionGameEl.classList.add('hidden');
+    running = true;
+    update();
   }
   renderHearts();
   updateScore();
@@ -447,6 +505,11 @@ if (document.getElementById('gameCanvas')) {
 
     if (frame % Math.max(100 - score, 40) === 0) spawnText();
     if (frame % 200 === 0 && Math.random() < 0.3) spawnHeart();
+    if (score >= 10 && !reactionGameStarted) {
+      reactionGameStarted = true;
+      startReactionGame();
+      return;
+    }
     if (score >= 15 && !runningTimeSpawned && !runningTimeAcquired) {
       spawnRunningItem();
       runningTimeSpawned = true;
@@ -564,6 +627,8 @@ if (document.getElementById('gameCanvas')) {
     runningTimeSpawned = false;
     runningTimeAcquired = false;
     linePuzzleStarted = false;
+    reactionGameStarted = false;
+    cardStarted = false;
     breakPieces.length = 0;
     if (inventory) inventory.innerHTML = '';
     renderHearts();

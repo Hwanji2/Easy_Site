@@ -525,6 +525,10 @@ body.light .overlay {
   color: #87ceeb;
 }
 .overlay.hidden { display: none; }
+.start-msg {
+  margin-bottom: 10px;
+}
+#lineTimer { display: none; }
 .card-grid {
   display: grid;
   grid-template-columns: repeat(4, 60px);
