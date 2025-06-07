@@ -23,7 +23,7 @@ body.light {
 
 body.dark {
   background: #000;
-  color: #0f0;
+  color: #fff;
   font-family: "Courier New", monospace;
 }
 
@@ -254,6 +254,9 @@ body.light .fade-section {
   margin-bottom: 20px;
   border-left: 6px solid #fff;
   padding-left: 15px;
+}
+body.light .section-title {
+  border-left-color: #000;
 }
 .section-title.red {
   border-color: red;
@@ -518,6 +521,8 @@ body.light .score-block {
   display: grid;
   grid-template-columns: repeat(4, 60px);
   gap: 5px;
+  transform: scale(0.45);
+  transform-origin: center;
 }
 .card-grid .card {
   width: 60px;
