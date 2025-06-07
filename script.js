@@ -98,6 +98,25 @@ if (document.getElementById('gameCanvas')) {
   let frame = 0;
   let score = 0;
   let best = parseInt(localStorage.getItem('highscore') || '0');
+  const maxHearts = 3;
+  let hearts = maxHearts;
+  const heartContainer = document.getElementById('heartContainer');
+  const gameOverEl = document.getElementById('gameOver');
+  const finalScoreEl = document.getElementById('finalScore');
+  const restartBtn = document.getElementById('restartBtn');
+  let running = true;
+
+  function renderHearts() {
+    if (!heartContainer) return;
+    heartContainer.innerHTML = '';
+    for (let i = 0; i < hearts; i++) {
+      const span = document.createElement('span');
+      span.className = 'heart';
+      span.textContent = '❤️';
+      heartContainer.appendChild(span);
+    }
+  }
+  renderHearts();
 
   function spawn() {
     const high = Math.random() < 0.5;
@@ -118,10 +137,14 @@ if (document.getElementById('gameCanvas')) {
       const scale = 1 + Math.min(score / 100, 2);
       player.vy = -10 * scale;
     }
-    if (e.code === 'ArrowDown' && player.y >= 110) {
-      player.sliding = true;
-      player.h = 10;
-      player.y = 120;
+    if (e.code === 'ArrowDown') {
+      if (player.y >= 110) {
+        player.sliding = true;
+        player.h = 10;
+        player.y = 120;
+      } else {
+        player.vy = Math.max(player.vy, 8);
+      }
     }
   });
   document.addEventListener('keyup', e => {
@@ -141,9 +164,13 @@ if (document.getElementById('gameCanvas')) {
   });
   canvas.addEventListener('pointermove', e => {
     if (startY !== null && e.clientY - startY > 30) {
-      player.sliding = true;
-      player.h = 10;
-      player.y = 120;
+      if (player.y >= 110) {
+        player.sliding = true;
+        player.h = 10;
+        player.y = 120;
+      } else {
+        player.vy = Math.max(player.vy, 8);
+      }
     }
   });
   canvas.addEventListener('pointerup', e => {
@@ -161,7 +188,23 @@ if (document.getElementById('gameCanvas')) {
     startY = null;
   });
 
+  function endGame() {
+    running = false;
+    if (gameOverEl) {
+      gameOverEl.classList.remove('hidden');
+      let disp = 0;
+      finalScoreEl.textContent = 'Score: 0';
+      const target = score;
+      const timer = setInterval(() => {
+        disp++;
+        finalScoreEl.textContent = 'Score: ' + disp;
+        if (disp >= target) clearInterval(timer);
+      }, 20);
+    }
+  }
+
   function update() {
+    if (!running) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const scale = 1 + Math.min(score / 100, 2);
     if (keys['ArrowLeft']) player.x = Math.max(0, player.x - 2 * scale);
@@ -178,10 +221,17 @@ if (document.getElementById('gameCanvas')) {
     obstacles.forEach(o => {
       if (player.x < o.x + o.w && player.x + player.w > o.x &&
           player.y < o.y + o.h && player.y + player.h > o.y) {
-        if (score > best) { best = score; localStorage.setItem('highscore', best); }
-        score = 0; obstacles.length = 0; o.x = canvas.width;
+        obstacles.length = 0;
         canvas.classList.add('shake');
         setTimeout(() => canvas.classList.remove('shake'), 300);
+        hearts = Math.max(0, hearts - 1);
+        const lost = heartContainer ? heartContainer.lastElementChild : null;
+        if (lost) lost.classList.add('fall');
+        setTimeout(renderHearts, 600);
+        if (hearts === 0) {
+          if (score > best) { best = score; localStorage.setItem('highscore', best); }
+          endGame();
+        }
       }
     });
 
@@ -204,6 +254,20 @@ if (document.getElementById('gameCanvas')) {
     frame++;
     requestAnimationFrame(update);
   }
+
+  function restartGame() {
+    hearts = maxHearts;
+    score = 0;
+    obstacles.length = 0;
+    player.x = 30; player.y = 110; player.vy = 0; player.sliding = false;
+    frame = 0;
+    renderHearts();
+    if (gameOverEl) gameOverEl.classList.add('hidden');
+    running = true;
+    update();
+  }
+  if (restartBtn) restartBtn.addEventListener('click', restartGame);
+
   update();
 }
 

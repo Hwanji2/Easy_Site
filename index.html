@@ -109,8 +109,15 @@
       <button data-target="calc">계산기</button>
     </div>
     <div id="game" class="dev-content">
-      <canvas id="gameCanvas" width="360" height="160"></canvas>
-      <p class="game-instr">←→ 이동, ↑ 또는 스페이스바로 점프, ↓로 슬라이드!</p>
+      <div class="game-wrapper">
+        <canvas id="gameCanvas" width="360" height="160"></canvas>
+        <div id="heartContainer" class="heart-container"></div>
+        <div id="gameOver" class="game-over hidden">
+          <div id="finalScore"></div>
+          <button id="restartBtn">다시 시작</button>
+        </div>
+      </div>
+      <p class="game-instr">←→ 이동, ↑ 또는 스페이스바로 점프, ↓로 슬라이드/빠른 낙하!</p>
     </div>
     <div id="obj3d" class="dev-content">
       <canvas id="cubeCanvas" width="300" height="200"></canvas>
