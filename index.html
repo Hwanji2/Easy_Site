@@ -112,6 +112,14 @@
       <div class="game-wrapper">
         <div class="game-area">
           <canvas id="gameCanvas" width="360" height="160"></canvas>
+          <div id="cardGame" class="overlay hidden">
+            <div id="cardTimer" class="timer"></div>
+            <div id="cardGrid" class="card-grid"></div>
+          </div>
+          <div id="linePuzzle" class="overlay hidden">
+            <div id="lineTimer" class="timer"></div>
+            <canvas id="lineCanvas" width="360" height="160"></canvas>
+          </div>
           <div id="gameOver" class="game-over hidden">
             <div id="finalScore"></div>
             <button id="restartBtn">다시 시작</button>
