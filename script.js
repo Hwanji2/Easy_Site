@@ -105,10 +105,16 @@ if (document.getElementById('gameCanvas')) {
   const maxHearts = 3;
   let hearts = maxHearts;
   const heartContainer = document.getElementById('heartContainer');
+  const scoreDisplay = document.getElementById('scoreDisplay');
+  const inventory = document.getElementById('inventory');
   const gameOverEl = document.getElementById('gameOver');
   const finalScoreEl = document.getElementById('finalScore');
   const restartBtn = document.getElementById('restartBtn');
   let running = true;
+  let runningTimeSpawned = false;
+  let runningTimeAcquired = false;
+  let boost = 0;
+  let decel = false;
 
   function renderHearts() {
     if (!heartContainer) return;
@@ -120,9 +126,15 @@ if (document.getElementById('gameCanvas')) {
       heartContainer.appendChild(span);
     }
   }
+  function updateScore() {
+    if (scoreDisplay) {
+      scoreDisplay.textContent = `Score: ${score}  Best: ${best}`;
+    }
+  }
   renderHearts();
+  updateScore();
 
-  function spawn() {
+  function spawnText() {
     const high = Math.random() < 0.5;
     const src = texts[Math.floor(Math.random() * texts.length)] || 'TXT';
     const len = Math.min(Math.max(1, Math.floor(Math.random() * 3) + 1), src.length);
@@ -131,12 +143,24 @@ if (document.getElementById('gameCanvas')) {
     const h = fontSize * text.length;
     const w = ctx.measureText('M').width; // approximate character width
     const base = high ? 90 : 130; // align with floor height at 130px
-    obstacles.push({ x: canvas.width, y: base - h, w, h, text });
+    obstacles.push({ type: 'text', x: canvas.width, y: base - h, w, h, text });
+  }
+
+  function spawnHeart() {
+    obstacles.push({ type: 'heart', x: canvas.width, y: 110, w: 16, h: 16 });
+  }
+
+  function spawnRunningItem() {
+    obstacles.push({ type: 'running', x: canvas.width, y: 100, w: 20, h: 20 });
   }
 
   const keys = {};
   document.addEventListener('keydown', e => {
     keys[e.code] = true;
+    if (runningTimeAcquired && (e.code === 'ShiftLeft' || e.code === 'ShiftRight') && !e.repeat) {
+      boost = Math.min(boost + 0.5, 3);
+      decel = false;
+    }
     if (e.code === 'Space' || e.code === 'ArrowUp') {
       if (player.y >= 110 && !player.sliding) {
         const scale = 1 + Math.min(score / 100, 2);
@@ -171,6 +195,9 @@ if (document.getElementById('gameCanvas')) {
     }
     if (e.code === 'Space' || e.code === 'ArrowUp') {
       jumpActive = false;
+    }
+    if (runningTimeAcquired && (e.code === 'ShiftLeft' || e.code === 'ShiftRight')) {
+      decel = true;
     }
   });
 
@@ -258,26 +285,60 @@ if (document.getElementById('gameCanvas')) {
       }
     }
 
-    if (frame % Math.max(100 - score, 40) === 0) spawn();
-    obstacles.forEach(o => o.x -= 2 * scale);
-    if (obstacles.length && obstacles[0].x + obstacles[0].w < 0) { obstacles.shift(); score++; }
+    if (frame % Math.max(100 - score, 40) === 0) spawnText();
+    if (frame % 200 === 0 && Math.random() < 0.3) spawnHeart();
+    if (score >= 15 && !runningTimeSpawned && !runningTimeAcquired) {
+      spawnRunningItem();
+      runningTimeSpawned = true;
+    }
+    obstacles.forEach(o => o.x -= (2 + boost) * scale);
+    if (obstacles.length && obstacles[0].x + obstacles[0].w < 0) { obstacles.shift(); score++; updateScore(); }
 
-    obstacles.forEach(o => {
+    if (decel) {
+      boost -= 0.1;
+      if (boost <= 0) { boost = 0; decel = false; }
+    }
+
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+      const o = obstacles[i];
       if (player.x < o.x + o.w && player.x + player.w > o.x &&
           player.y < o.y + o.h && player.y + player.h > o.y) {
-        obstacles.length = 0;
-        canvas.classList.add('shake');
-        setTimeout(() => canvas.classList.remove('shake'), 300);
-        hearts = Math.max(0, hearts - 1);
-        const lost = heartContainer ? heartContainer.lastElementChild : null;
-        if (lost) lost.classList.add('fall');
-        setTimeout(renderHearts, 600);
-        if (hearts === 0) {
-          if (score > best) { best = score; localStorage.setItem('highscore', best); }
-          endGame();
+        if (o.type === 'heart') {
+          hearts = Math.min(maxHearts, hearts + 1);
+          obstacles.splice(i, 1);
+          renderHearts();
+          continue;
+        } else if (o.type === 'running') {
+          runningTimeAcquired = true;
+          obstacles.splice(i, 1);
+          if (inventory && !document.getElementById('runningTimeCard')) {
+            const card = document.createElement('div');
+            card.id = 'runningTimeCard';
+            card.className = 'card';
+            card.textContent = 'RunningTime';
+            card.title = '러닝타임: 간단한 러너 예제';
+            card.addEventListener('click', () => {
+              window.open('https://github.com/Hwanji2/RUNNING-TIME', '_blank');
+            });
+            inventory.appendChild(card);
+          }
+          continue;
+        } else {
+          obstacles.length = 0;
+          canvas.classList.add('shake');
+          setTimeout(() => canvas.classList.remove('shake'), 300);
+          hearts = Math.max(0, hearts - 1);
+          const lost = heartContainer ? heartContainer.lastElementChild : null;
+          if (lost) lost.classList.add('fall');
+          setTimeout(renderHearts, 600);
+          if (hearts === 0) {
+            if (score > best) { best = score; localStorage.setItem('highscore', best); }
+            updateScore();
+            endGame();
+          }
         }
       }
-    });
+    }
 
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 130, canvas.width, 20);
@@ -286,9 +347,17 @@ if (document.getElementById('gameCanvas')) {
     ctx.fillStyle = '#ff5555';
     obstacles.forEach(o => {
       ctx.save();
-      ctx.font = fontSize + "px 'Press Start 2P', monospace";
-      for (let i = 0; i < o.text.length; i++) {
-        ctx.fillText(o.text[i], o.x, o.y + fontSize * (i + 1));
+      if (o.type === 'text') {
+        ctx.font = fontSize + "px 'Press Start 2P', monospace";
+        for (let i = 0; i < o.text.length; i++) {
+          ctx.fillText(o.text[i], o.x, o.y + fontSize * (i + 1));
+        }
+      } else if (o.type === 'heart') {
+        ctx.font = '16px \"Press Start 2P\", monospace';
+        ctx.fillText('💙', o.x, o.y);
+      } else if (o.type === 'running') {
+        ctx.font = '12px \"Press Start 2P\", monospace';
+        ctx.fillText('RT', o.x, o.y);
       }
       ctx.restore();
     });
@@ -305,7 +374,13 @@ if (document.getElementById('gameCanvas')) {
     obstacles.length = 0;
     player.x = 30; player.y = 110; player.vy = 0; player.sliding = false;
     frame = 0;
+    boost = 0;
+    decel = false;
+    runningTimeSpawned = false;
+    runningTimeAcquired = false;
+    if (inventory) inventory.innerHTML = '';
     renderHearts();
+    updateScore();
     if (gameOverEl) gameOverEl.classList.add('hidden');
     running = true;
     update();

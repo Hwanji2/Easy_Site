@@ -436,6 +436,13 @@ body.light .skill-table td {
 }
 
 /* Simple runner game */
+.game-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  position: relative;
+}
+.game-area { position: relative; }
 #gameCanvas {
   background: linear-gradient(#e8f4ff, #bcd4ff);
   border: 1px solid #8ab4f8;
@@ -443,16 +450,20 @@ body.light .skill-table td {
   font-family: 'Press Start 2P', monospace;
   image-rendering: pixelated;
 }
-.game-wrapper { position: relative; display: inline-block; }
+.side-ui {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+}
+.score-display { margin-bottom: 6px; }
 .heart-container {
-  position: fixed;
-  top: 4px;
-  left: 4px;
+  position: static;
   display: flex;
   gap: 4px;
   pointer-events: none;
   font-size: 18px;
-  z-index: 1000;
 }
 .heart { transition: transform 0.3s, opacity 0.3s; }
 .heart.fall { animation: heart-fall 0.6s forwards; }
@@ -562,3 +573,19 @@ body.light .audio-player input[type=range]::-webkit-slider-thumb {
   padding-left: 20px;
   font-size: 0.9rem;
 }
+
+.inventory {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.inventory .card {
+  padding: 4px 6px;
+  background: #eee;
+  border: 1px solid #999;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 10px;
+}
+.inventory .card:hover { background: #ddd; }
