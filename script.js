@@ -97,7 +97,6 @@ if (document.getElementById('gameCanvas')) {
   let jumpTimer = 0;
   const maxJumpTime = 15;
   let canDouble = false;
-  let wantSlide = false;
   const obstacles = [];
   const fontSize = 24;
   let frame = 0;
@@ -141,13 +140,13 @@ if (document.getElementById('gameCanvas')) {
     if (e.code === 'Space' || e.code === 'ArrowUp') {
       if (player.y >= 110 && !player.sliding) {
         const scale = 1 + Math.min(score / 100, 2);
-        player.vy = -10 * scale;
+        player.vy = -8 * scale;
         jumpActive = true;
         jumpTimer = 0;
         canDouble = true;
       } else if (canDouble) {
         const scale = 1 + Math.min(score / 100, 2);
-        player.vy = -10 * scale;
+        player.vy = -8 * scale;
         jumpActive = true;
         jumpTimer = 0;
         canDouble = false;
@@ -160,16 +159,15 @@ if (document.getElementById('gameCanvas')) {
         player.y = 120;
       } else {
         player.vy = Math.max(player.vy, 8);
-        wantSlide = true;
       }
     }
   });
   document.addEventListener('keyup', e => {
     keys[e.code] = false;
-    if (e.code === 'ArrowDown' && player.sliding) {
+    if (e.code === 'ArrowDown') {
       player.sliding = false;
       player.h = 20;
-      player.y = 110;
+      if (player.y >= 110) player.y = 110;
     }
     if (e.code === 'Space' || e.code === 'ArrowUp') {
       jumpActive = false;
@@ -194,17 +192,16 @@ if (document.getElementById('gameCanvas')) {
           player.y = 120;
         } else {
           player.vy = Math.max(player.vy, 8);
-          wantSlide = true;
         }
       } else {
         const scale = 1 + Math.min(score / 100, 2);
         if (player.y >= 110 && !player.sliding) {
-          player.vy = -10 * scale;
+          player.vy = -8 * scale;
           jumpActive = true;
           jumpTimer = 0;
           canDouble = true;
         } else if (canDouble) {
-          player.vy = -10 * scale;
+          player.vy = -8 * scale;
           jumpActive = true;
           jumpTimer = 0;
           canDouble = false;
@@ -247,13 +244,18 @@ if (document.getElementById('gameCanvas')) {
     if (player.y > floorY) {
       player.y = floorY;
       player.vy = 0;
-      if (wantSlide) {
+      canDouble = false;
+    }
+    if (player.y >= 110) {
+      if (keys['ArrowDown']) {
         player.sliding = true;
         player.h = 10;
         player.y = 120;
-        wantSlide = false;
+      } else if (player.sliding) {
+        player.sliding = false;
+        player.h = 20;
+        player.y = 110;
       }
-      canDouble = false;
     }
 
     if (frame % Math.max(100 - score, 40) === 0) spawn();
@@ -293,11 +295,6 @@ if (document.getElementById('gameCanvas')) {
     ctx.fillStyle = '#000';
     ctx.font = "12px 'Press Start 2P', monospace";
     ctx.fillText('Score: ' + score + '  Best: ' + best, 10, 24);
-    if (heartContainer) {
-      const w = ctx.measureText('Score: ' + score + '  Best: ' + best).width;
-      heartContainer.style.left = (10 + w + 10) + 'px';
-      heartContainer.style.top = '24px';
-    }
     frame++;
     requestAnimationFrame(update);
   }
