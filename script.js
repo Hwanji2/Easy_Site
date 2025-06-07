@@ -128,7 +128,9 @@ if (document.getElementById('gameCanvas')) {
   }
   function updateScore() {
     if (scoreDisplay) {
-      scoreDisplay.textContent = `Score: ${score}  Best: ${best}`;
+      scoreDisplay.innerHTML =
+        `<span class="score-block">Score: ${score}</span>` +
+        `<span class="score-block">Best: ${best}</span>`;
     }
   }
   renderHearts();
@@ -356,6 +358,7 @@ if (document.getElementById('gameCanvas')) {
         ctx.font = '16px \"Press Start 2P\", monospace';
         ctx.fillText('💙', o.x, o.y);
       } else if (o.type === 'running') {
+        ctx.fillStyle = '#3399ff';
         ctx.font = '12px \"Press Start 2P\", monospace';
         ctx.fillText('RT', o.x, o.y);
       }
