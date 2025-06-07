@@ -445,13 +445,14 @@ body.light .skill-table td {
 }
 .game-wrapper { position: relative; display: inline-block; }
 .heart-container {
-  position: absolute;
-  top: 24px;
+  position: fixed;
+  top: 4px;
   left: 4px;
   display: flex;
   gap: 4px;
   pointer-events: none;
   font-size: 18px;
+  z-index: 1000;
 }
 .heart { transition: transform 0.3s, opacity 0.3s; }
 .heart.fall { animation: heart-fall 0.6s forwards; }
