@@ -119,9 +119,11 @@ if (document.getElementById('gameCanvas')) {
   const lineTimerEl = document.getElementById('lineTimer');
   const reactionGameEl = document.getElementById('reactionGame');
   const reactionMsg = document.getElementById('reactionMsg');
+  const introOptions = document.getElementById('introOptions');
   const breakPieces = [];
   let linePuzzleStarted = false;
   let reactionGameStarted = false;
+  let cardGameShown = false;
   const heartContainer = document.getElementById('heartContainer');
   const scoreDisplay = document.getElementById('scoreDisplay');
   const inventory = document.getElementById('inventory');
@@ -142,6 +144,9 @@ if (document.getElementById('gameCanvas')) {
   let introPhase = 0;
   const introPlayer = { x: 240, y: 140 };
   const introNpc = { x: 240, y: 80 };
+  const playerGuess = navigator.userAgent.split(' ')[0] || '플레이어';
+  let playerName = playerGuess;
+  let introStep = 0;
 
   function typeDialogue(text, cb) {
     if (!introMsg) { cb && cb(); return; }
@@ -170,6 +175,74 @@ if (document.getElementById('gameCanvas')) {
       next();
     }
     next();
+  }
+
+  function showOptions(opts) {
+    if (!introOptions) { opts[0] && opts[0].onSelect(); return; }
+    introOptions.innerHTML = '';
+    opts.forEach(o => {
+      const b = document.createElement('button');
+      b.textContent = o.text;
+      b.addEventListener('click', () => {
+        introOptions.classList.add('hidden');
+        o.onSelect();
+      });
+      introOptions.appendChild(b);
+    });
+    introOptions.classList.remove('hidden');
+  }
+
+  function nextIntro() {
+    switch(introStep) {
+      case 0:
+        typeDialogue('연결되었나요? 게임이니까 부담 갖지 마세요.', () => {
+          showOptions([{ text: '계속', onSelect: () => { introStep++; nextIntro(); } }]);
+        });
+        break;
+      case 1:
+        typeDialogue(`${playerGuess}가 맞나요?`, () => {
+          showOptions([
+            { text: '맞아요', onSelect: () => { playerName = playerGuess; introStep++; nextIntro(); } },
+            { text: '아니요', onSelect: () => { const n = prompt('이름을 입력하세요'); if(n) playerName = n; introStep++; nextIntro(); } }
+          ]);
+        });
+        break;
+      case 2:
+        const t = new Date().toLocaleTimeString();
+        typeDialogue(`지금 시간이 ${t} 맞나요?`, () => {
+          showOptions([
+            { text: '맞아', onSelect: () => { introStep++; nextIntro(); } },
+            { text: '잘 모르겠는데', onSelect: () => { introStep++; nextIntro(); } }
+          ]);
+        });
+        break;
+      case 3:
+        typeDialogue(`안녕, ${playerName}!`, () => { introStep++; nextIntro(); });
+        break;
+      case 4:
+        typeDialogue('게임의 탑에 온걸 환영한다!', () => { introStep++; nextIntro(); });
+        break;
+      case 5:
+        typeDialogue('선택받은 인간으로서 낙원에 가려면 이 탑을 올라야 한다.', () => { introStep++; nextIntro(); });
+        break;
+      case 6:
+        typeDialogue('탑은 총 10층으로 이루어져 있다.', () => { introStep++; nextIntro(); });
+        break;
+      case 7:
+        typeDialogue('준비가 되었는가?', () => {
+          showOptions([
+            { text: '준비됐어', onSelect: () => { introStep = 9; nextIntro(); } },
+            { text: '말도 안돼', onSelect: () => { introStep = 8; nextIntro(); } }
+          ]);
+        });
+        break;
+      case 8:
+        typeDialogue('게임의 탑의 역사로 사람들은 더 이상 일을 할 필요가 없어졌다. 그리고 그들은 삶의 의미를 게임에서 찾았다.', () => { introStep = 9; nextIntro(); });
+        break;
+      case 9:
+        typeDialogue('준비가 되었다면 버튼을 누르거라.', () => { if (startTowerBtn) startTowerBtn.classList.remove('hidden'); });
+        break;
+    }
   }
 
   function renderHearts() {
@@ -446,27 +519,21 @@ if (document.getElementById('gameCanvas')) {
   }
 
   function startTowerIntro() {
-    if (!towerIntroEl) { startCardGame(); return; }
+    if (!towerIntroEl) { running = true; return; }
+    running = false;
     visitCount++;
     localStorage.setItem('towerVisits', visitCount);
-    introPhase = 0;
     introActive = true;
-    introPlayer.x = 240;
-    introPlayer.y = 140;
-    if (introMsg) {
-      typeDialogue(visitCount === 1 ? '반가워요' : `벌써 ${visitCount}번째네요`);
-    }
+    introStep = 0;
+    if (introMsg) introMsg.classList.remove('hidden');
     if (startTowerBtn) startTowerBtn.classList.add('hidden');
     towerIntroEl.classList.remove('hidden');
+    nextIntro();
   }
 
   if (towerIntroEl) {
     towerIntroEl.addEventListener('pointerdown', () => {
-      if (introPhase === 0) {
-        introPhase = 1;
-        if (introMsg) introMsg.classList.add('hidden');
-        requestAnimationFrame(drawIntro);
-      }
+      // prevent accidental skip while options are visible
     });
   }
 
@@ -475,7 +542,6 @@ if (document.getElementById('gameCanvas')) {
       towerIntroEl.classList.add('hidden');
       introActive = false;
       running = true;
-      startCardGame();
     });
   }
 
@@ -612,6 +678,11 @@ if (document.getElementById('gameCanvas')) {
 
     if (frame % Math.max(100 - score, 40) === 0) spawnText();
     if (frame % 200 === 0 && Math.random() < 0.3) spawnHeart();
+    if (score >= 5 && !cardGameShown) {
+      cardGameShown = true;
+      startCardGame();
+      return;
+    }
     if (score >= 10 && !reactionGameStarted) {
       reactionGameStarted = true;
       startReactionGame();
@@ -736,6 +807,7 @@ if (document.getElementById('gameCanvas')) {
     linePuzzleStarted = false;
     reactionGameStarted = false;
     cardStarted = false;
+    cardGameShown = false;
     breakPieces.length = 0;
     if (inventory) inventory.innerHTML = '';
     renderHearts();
