@@ -327,6 +327,11 @@ if (document.getElementById('gameCanvas')) {
       span.textContent = '💙';
       heartContainer.appendChild(span);
     }
+    if (hearts === 1) {
+      heartContainer.classList.add('low');
+    } else {
+      heartContainer.classList.remove('low');
+    }
   }
   function updateScore() {
     if (score > best) { best = score; localStorage.setItem("highscore", best); }
@@ -654,12 +659,29 @@ if (document.getElementById('gameCanvas')) {
   canvas.style.touchAction = 'none';
   let startY = null;
   let touchHeld = false;
+  let dragTriggered = false;
   canvas.addEventListener('pointerdown', e => {
     startY = e.clientY;
     touchHeld = true;
+    dragTriggered = false;
+  });
+  canvas.addEventListener('pointermove', e => {
+    if (startY !== null && !dragTriggered) {
+      const dy = e.clientY - startY;
+      if (dy > 30) {
+        dragTriggered = true;
+        if (player.y >= 110) {
+          player.sliding = true;
+          player.h = 10;
+          player.y = 120;
+        } else {
+          player.vy = Math.max(player.vy, 8);
+        }
+      }
+    }
   });
   canvas.addEventListener('pointerup', e => {
-    if (startY !== null) {
+    if (startY !== null && !dragTriggered) {
       const dy = e.clientY - startY;
       if (dy > 30) {
         if (player.y >= 110) {
@@ -687,6 +709,7 @@ if (document.getElementById('gameCanvas')) {
     touchHeld = false;
     jumpActive = false;
     startY = null;
+    dragTriggered = false;
   });
 
   function endGame() {
@@ -844,7 +867,12 @@ if (document.getElementById('gameCanvas')) {
     ctx.save();
     ctx.shadowColor = '#87ceeb';
     ctx.shadowBlur = glow;
-    trees.forEach(t => { ctx.save(); ctx.globalAlpha = 0.5; ctx.fillText(t.emoji, t.x, t.y); ctx.restore(); });
+    trees.forEach(t => {
+      ctx.save();
+      ctx.globalAlpha = shiftDown ? 0.5 : 1;
+      ctx.fillText(t.emoji, t.x, t.y);
+      ctx.restore();
+    });
     ctx.fillStyle = '#3399ff';
     ctx.fillRect(player.x, player.y, player.w, player.h);
     ctx.fillStyle = '#ff5555';
