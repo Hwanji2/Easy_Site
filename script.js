@@ -56,39 +56,17 @@ if (startSquare) {
   function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
   async function animateSquare(){
     let dir = 1, pos = 0;
-    await sleep(4000);
+    await sleep(1000);
     while(!cancelled){
-      const start = performance.now();
-      while(performance.now() - start < 1500 && !cancelled){
-        const limit = startArea.clientWidth - 20;
-        pos += dir * 2;
-        if(pos > limit || pos < 0) dir *= -1;
-        startSquare.style.left = pos + 'px';
-        await sleep(16);
+      const limit = startArea.clientWidth - 20;
+      pos += dir;
+      if(pos >= limit || pos <= 0){
+        dir *= -1;
+        pos = Math.max(0, Math.min(limit, pos));
+        await sleep(300 + Math.random()*700);
       }
-      for(const cell of cells){
-        if(cancelled) break;
-        const rect = cell.getBoundingClientRect();
-        startSquare.style.position = 'fixed';
-        startSquare.style.transition = 'transform 0.3s';
-        startSquare.style.transform = `translate(${rect.left + rect.width/2 - 10}px, ${rect.top + rect.height/2 - 10}px)`;
-        await sleep(350);
-      }
-      if(cancelled) break;
-      startSquare.style.transition = 'none';
-      function follow(e){
-        const r = develop.getBoundingClientRect();
-        const x = Math.min(r.right - 20, Math.max(r.left, e.clientX)) - 10;
-        const y = Math.min(r.bottom - 20, Math.max(r.top, e.clientY)) - 10;
-        startSquare.style.transform = `translate(${x}px, ${y}px)`;
-      }
-      develop.addEventListener('pointermove', follow);
-      await sleep(1500);
-      develop.removeEventListener('pointermove', follow);
-      startSquare.style.position = 'absolute';
-      startSquare.style.transform = 'translate(0,0)';
-      pos = 0; startSquare.style.left = '0px';
-      await sleep(500);
+      startSquare.style.left = pos + 'px';
+      await sleep(16);
     }
   }
   animateSquare();
@@ -98,22 +76,22 @@ if (startSquare) {
     const game = document.getElementById('game');
     const canvas = document.getElementById('gameCanvas');
     document.querySelectorAll('.dev-content').forEach(c => c.classList.remove('active'));
-    if (canvas) {
-      const sq = startSquare.getBoundingClientRect();
-      const cv = canvas.getBoundingClientRect();
-      startSquare.style.position = 'fixed';
-      startSquare.style.left = sq.left + 'px';
-      startSquare.style.top = sq.top + 'px';
-      startSquare.style.transition = 'transform 0.5s, opacity 0.5s';
-      startSquare.style.transform = `translate(${cv.left + cv.width/2 - 10 - sq.left}px, ${cv.top + cv.height/2 - 10 - sq.top}px)`;
-      setTimeout(()=>{ startSquare.style.opacity = 0; }, 500);
-      setTimeout(()=>{ if(startArea) startArea.style.display = 'none'; }, 1000);
-    }
     if (game && canvas) {
       game.classList.add('active');
       canvas.classList.remove('collapsed');
       canvas.classList.add('flash');
-      setTimeout(()=>canvas.classList.remove('flash'), 600);
+      setTimeout(() => canvas.classList.remove('flash'), 600);
+      setTimeout(() => {
+        const sq = startSquare.getBoundingClientRect();
+        const cv = canvas.getBoundingClientRect();
+        startSquare.style.position = 'fixed';
+        startSquare.style.left = sq.left + 'px';
+        startSquare.style.top = sq.top + 'px';
+        startSquare.style.transition = 'transform 0.5s, opacity 0.5s';
+        startSquare.style.transform = `translate(${cv.left + cv.width/2 - 10 - sq.left}px, ${cv.top + cv.height/2 - 10 - sq.top}px)`;
+        setTimeout(() => { startSquare.style.opacity = 0; }, 500);
+        setTimeout(() => { if(startArea) startArea.style.display = 'none'; }, 1000);
+      }, 500);
     }
     restartGame();
   });
@@ -184,6 +162,10 @@ if (document.getElementById('gameCanvas')) {
   let nextWidthScore = 50;
   let nextThemeScore = 100;
   let nextMoveScore = 30;
+  let nextShakeScore = 110;
+  let shakeFrames = 0;
+  let shakeAmp = 0;
+  let canvasShakeX = 0;
   let canvasTx = 0, canvasTy = 0, canvasScale = 1;
   const maxHearts = 3;
   let hearts = maxHearts;
@@ -217,7 +199,6 @@ if (document.getElementById('gameCanvas')) {
   let runningTimeSpawned = false;
   let runningTimeAcquired = false;
   let boost = 0;
-  let decel = false;
   let reactionActive = false;
   let reactionTimeout;
   let reactionTimer;
@@ -616,7 +597,6 @@ if (document.getElementById('gameCanvas')) {
     keys[e.code] = true;
     if (runningTimeAcquired && (e.code === 'ShiftLeft' || e.code === 'ShiftRight') && !e.repeat) {
       boost = Math.min(boost + 0.5, 3);
-      decel = false;
     }
     if (['Space', 'ArrowUp', 'KeyW'].includes(e.code)) {
       if (player.y >= 110 && !player.sliding) {
@@ -654,7 +634,7 @@ if (document.getElementById('gameCanvas')) {
       jumpActive = false;
     }
     if (runningTimeAcquired && (e.code === 'ShiftLeft' || e.code === 'ShiftRight')) {
-      decel = true;
+      boost = 0;
     }
   });
 
@@ -721,7 +701,7 @@ if (document.getElementById('gameCanvas')) {
     } else {
       canvas.style.width = '480px';
     }
-    canvas.style.transform = `rotateX(25deg) translate(${canvasTx}px, ${canvasTy}px) scale(${canvasScale})`;
+    canvas.style.transform = `rotateX(25deg) translate(${canvasTx + canvasShakeX}px, ${canvasTy}px) scale(${canvasScale})`;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const scale = 1 + Math.min(score / 100, 2);
     if (keys['ArrowLeft'] || keys['KeyA']) player.x = Math.max(0, player.x - 2 * scale);
@@ -766,15 +746,26 @@ if (document.getElementById('gameCanvas')) {
       document.body.classList.toggle('dark');
       document.body.classList.toggle('light');
     }
+    if (score >= nextShakeScore) {
+      nextShakeScore += 110;
+      shakeFrames = 600;
+      const wrap = canvas.parentElement;
+      const width = wrap ? wrap.clientWidth : window.innerWidth;
+      shakeAmp = Math.max(0, width/2 - canvas.width/2);
+    }
+    if (shakeFrames > 0) {
+      const p = 1 - shakeFrames / 600;
+      canvasShakeX = -shakeAmp + p * 2 * shakeAmp + Math.sin(p * 20 * Math.PI) * 5;
+      shakeFrames--;
+    } else {
+      canvasShakeX = 0;
+    }
     obstacles.forEach(o => o.x -= (2 + boost) * scale);
     trees.forEach(t => t.x -= 1);
     if (trees.length && trees[0].x < -20) trees.shift();
     if (obstacles.length && obstacles[0].x + obstacles[0].w < 0) { obstacles.shift(); score++; updateScore(); }
 
-    if (decel) {
-      boost -= 0.1;
-      if (boost <= 0) { boost = 0; decel = false; }
-    }
+    // boost resets instantly when shift is released
 
     for (let i = obstacles.length - 1; i >= 0; i--) {
       const o = obstacles[i];
@@ -832,13 +823,13 @@ if (document.getElementById('gameCanvas')) {
     ctx.save();
     ctx.shadowColor = '#87ceeb';
     ctx.shadowBlur = glow;
-    trees.forEach(t => ctx.fillText(t.emoji, t.x, t.y));
+    trees.forEach(t => { ctx.save(); ctx.globalAlpha = 0.5; ctx.fillText(t.emoji, t.x, t.y); ctx.restore(); });
     ctx.fillStyle = '#3399ff';
     ctx.fillRect(player.x, player.y, player.w, player.h);
     ctx.fillStyle = '#ff5555';
     obstacles.forEach(o => {
       ctx.save();
-      ctx.shadowColor = '#87ceeb';
+      ctx.shadowColor = '#ffaaaa';
       ctx.shadowBlur = glow;
       if (o.type === 'text') {
         ctx.font = fontSize + "px 'Press Start 2P', monospace";
@@ -864,7 +855,7 @@ if (document.getElementById('gameCanvas')) {
       p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.a -= 0.02;
       if (p.a <= 0) { breakPieces.splice(i,1); continue; }
       ctx.save();
-      ctx.shadowColor = '#87ceeb';
+      ctx.shadowColor = '#ffaaaa';
       ctx.shadowBlur = glow;
       ctx.globalAlpha = p.a;
       ctx.fillStyle = '#ff5555';
@@ -883,7 +874,6 @@ if (document.getElementById('gameCanvas')) {
     player.x = 30; player.y = 110; player.vy = 0; player.sliding = false;
     frame = 0;
     boost = 0;
-    decel = false;
     runningTimeSpawned = false;
     runningTimeAcquired = false;
     linePuzzleStarted = false;
@@ -893,6 +883,7 @@ if (document.getElementById('gameCanvas')) {
     breakPieces.length = 0;
     if (inventory) inventory.innerHTML = '';
     canvasTx = 0; canvasTy = 0; canvasScale = 1; nextMoveScore = 30;
+    nextShakeScore = 110; shakeFrames = 0; canvasShakeX = 0;
     startCodeTyping();
     renderHearts();
     updateScore();
