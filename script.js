@@ -140,8 +140,37 @@ if (document.getElementById('gameCanvas')) {
   let visitCount = parseInt(localStorage.getItem('towerVisits') || '0');
   let introActive = false;
   let introPhase = 0;
-  const introPlayer = { x: 180, y: 120 };
-  const introNpc = { x: 180, y: 60 };
+  const introPlayer = { x: 240, y: 140 };
+  const introNpc = { x: 240, y: 80 };
+
+  function typeDialogue(text, cb) {
+    if (!introMsg) { cb && cb(); return; }
+    introMsg.textContent = '';
+    let i = 0;
+    introMsg.classList.remove('hidden');
+    const timer = setInterval(() => {
+      introMsg.textContent += text[i++];
+      if (i >= text.length) {
+        clearInterval(timer);
+        cb && cb();
+      }
+    }, 100);
+  }
+
+  function playDialogue(lines, done) {
+    let idx = 0;
+    function next() {
+      if (idx >= lines.length) { if(done) done(); return; }
+      typeDialogue(lines[idx], () => {
+        towerIntroEl.addEventListener('pointerdown', advance, { once: true });
+      });
+    }
+    function advance() {
+      idx++;
+      next();
+    }
+    next();
+  }
 
   function renderHearts() {
     if (!heartContainer) return;
@@ -266,8 +295,8 @@ if (document.getElementById('gameCanvas')) {
 
   let lineTime = 15, lineInterval, lines = [], currentLine = null;
   const nodes = lineCanvas ? [
-    {x:50,y:40,color:'red'}, {x:310,y:40,color:'red'},
-    {x:50,y:120,color:'blue'}, {x:310,y:120,color:'blue'}
+    {x:50,y:40,color:'red'}, {x:430,y:40,color:'red'},
+    {x:50,y:160,color:'blue'}, {x:430,y:160,color:'blue'}
   ] : [];
 
   function drawLinePuzzle() {
@@ -392,20 +421,25 @@ if (document.getElementById('gameCanvas')) {
     if (keys['ArrowDown'] || keys['KeyS']) introPlayer.y += spd;
     introPlayer.x = Math.max(5, Math.min(introCanvas.width - 5, introPlayer.x));
     introPlayer.y = Math.max(5, Math.min(introCanvas.height - 5, introPlayer.y));
-    introCtx.fillStyle = '#222';
+    introCtx.fillStyle = '#554433';
     introCtx.fillRect(0, 0, introCanvas.width, introCanvas.height);
-    introCtx.fillStyle = '#999';
+    introCtx.fillStyle = '#332211';
+    introCtx.fillRect(0, 0, introCanvas.width, 10);
+    introCtx.fillRect(0, introCanvas.height - 10, introCanvas.width, 10);
+    introCtx.fillRect(0, 0, 10, introCanvas.height);
+    introCtx.fillRect(introCanvas.width - 10, 0, 10, introCanvas.height);
+    introCtx.fillStyle = '#ff9900';
     introCtx.fillRect(introNpc.x - 6, introNpc.y - 6, 12, 12);
     introCtx.fillStyle = '#3399ff';
     introCtx.fillRect(introPlayer.x - 5, introPlayer.y - 5, 10, 10);
     if (Math.hypot(introPlayer.x - introNpc.x, introPlayer.y - introNpc.y) < 12) {
       introPhase = 2;
-      if (introMsg) {
-        introMsg.textContent =
-          '게임의 탑에 온걸 환영한다! 선택받은 인간으로서 낙원에 가려면 게임의 탑을 올라야 한다. 탑은 총 10층이다. 오르겠는가?';
-        introMsg.classList.remove('hidden');
-      }
-      if (startTowerBtn) startTowerBtn.classList.remove('hidden');
+      playDialogue([
+        '게임의 탑에 온걸 환영한다!',
+        '선택받은 인간으로서 낙원에 가려면 이 탑을 올라야 한다.',
+        '탑은 총 10층으로 이루어져 있다.',
+        '준비가 되었다면 버튼을 누르거라.'
+      ], () => { if (startTowerBtn) startTowerBtn.classList.remove('hidden'); });
       return;
     }
     requestAnimationFrame(drawIntro);
@@ -417,11 +451,10 @@ if (document.getElementById('gameCanvas')) {
     localStorage.setItem('towerVisits', visitCount);
     introPhase = 0;
     introActive = true;
-    introPlayer.x = 180;
-    introPlayer.y = 120;
+    introPlayer.x = 240;
+    introPlayer.y = 140;
     if (introMsg) {
-      introMsg.textContent = visitCount === 1 ? '반가워요' : `벌써 ${visitCount}번째네요`;
-      introMsg.classList.remove('hidden');
+      typeDialogue(visitCount === 1 ? '반가워요' : `벌써 ${visitCount}번째네요`);
     }
     if (startTowerBtn) startTowerBtn.classList.add('hidden');
     towerIntroEl.classList.remove('hidden');

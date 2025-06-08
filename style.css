@@ -539,6 +539,17 @@ body.light .overlay {
 .start-msg {
   margin-bottom: 10px;
 }
+#introMsg {
+  max-width: 90%;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.7);
+  border-radius: 6px;
+  line-height: 1.4;
+}
+body.light #introMsg {
+  background: rgba(255,255,255,0.9);
+  color: #333;
+}
 #lineTimer { display: none; }
 .card-grid {
   display: grid;
