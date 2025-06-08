@@ -531,6 +531,13 @@ body.light .score-block {
   color: #3399ff;
   filter: drop-shadow(0 0 4px #3399ff);
 }
+.heart-container.low .heart {
+  animation: heart-glow 1s infinite;
+}
+@keyframes heart-glow {
+  0% { filter: drop-shadow(0 0 2px #3399ff); opacity: 0.5; }
+  100% { filter: drop-shadow(0 0 8px #3399ff); opacity: 1; }
+}
 .heart.fall { animation: heart-fall 0.6s forwards; }
 @keyframes heart-fall {
   to { transform: translateY(20px); opacity: 0; }
@@ -546,7 +553,19 @@ body.light .score-block {
   justify-content: center;
   align-items: center;
 }
-.game-over button { margin-top: 10px; padding: 6px 12px; }
+.game-over button {
+  margin-top: 10px;
+  padding: 6px 12px;
+  font-family: 'Press Start 2P', monospace;
+  background: #111;
+  color: #87ceeb;
+  border: 2px solid #87ceeb;
+  border-radius: 2px;
+  cursor: pointer;
+}
+body.light .game-over button {
+  background: #fff;
+}
 .overlay #startTowerBtn {
   position: absolute;
   left: 50%;
