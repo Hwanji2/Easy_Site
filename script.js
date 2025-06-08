@@ -174,6 +174,7 @@ if (document.getElementById('gameCanvas')) {
   let shakeAmp = 0;
   let canvasShakeX = 0;
   let canvasTx = 0, canvasTy = 0, canvasScale = 1;
+  let camY = 0;
   const maxHearts = 3;
   let hearts = maxHearts;
   const cardGameEl = document.getElementById('cardGame');
@@ -730,9 +731,11 @@ if (document.getElementById('gameCanvas')) {
       canDouble = false;
     }
     const jumpDiff = Math.max(0, floorY - player.y);
+    const targetY = jumpDiff * 0.5;
+    camY += (targetY - camY) * 0.2;
     canvas.style.height = baseCanvasHeight + 'px';
     ctx.save();
-    ctx.translate(0, jumpDiff);
+    ctx.translate(0, camY);
     if (player.y >= 110) {
       if (keys['ArrowDown'] || keys['KeyS']) {
         player.sliding = true;
@@ -904,7 +907,7 @@ if (document.getElementById('gameCanvas')) {
     cardGameShown = false;
     breakPieces.length = 0;
     if (inventory) inventory.innerHTML = '';
-    canvasTx = 0; canvasTy = 0; canvasScale = 1; nextMoveScore = 30;
+    canvasTx = 0; canvasTy = 0; canvasScale = 1; camY = 0; nextMoveScore = 30;
     nextShakeScore = 110; shakeFrames = 0; canvasShakeX = 0;
     canvas.style.height = baseCanvasHeight + 'px';
     startCodeTyping();
