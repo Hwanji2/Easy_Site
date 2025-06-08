@@ -525,7 +525,11 @@ body.light .score-block {
   pointer-events: none;
   font-size: 18px;
 }
-.heart { transition: transform 0.3s, opacity 0.3s; }
+.heart {
+  transition: transform 0.3s, opacity 0.3s;
+  color: #3399ff;
+  filter: drop-shadow(0 0 4px #3399ff);
+}
 .heart.fall { animation: heart-fall 0.6s forwards; }
 @keyframes heart-fall {
   to { transform: translateY(20px); opacity: 0; }

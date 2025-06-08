@@ -142,9 +142,15 @@ if (document.getElementById('gameCanvas')) {
     clearInterval(codeInterval);
     codeBg.textContent = '';
     let idx = 0;
-    codeInterval = setInterval(()=>{
+    codeInterval = setInterval(() => {
       codeBg.textContent += codeString[idx];
-      idx = (idx + 1) % codeString.length;
+      idx++;
+      if (idx >= codeString.length) {
+        idx = 0;
+      }
+      if (codeBg.textContent.length > 200) {
+        codeBg.textContent = '';
+      }
     }, 60);
   }
   const player = { x: 30, y: 110, w: 20, h: 20, vy: 0, sliding: false };
@@ -199,6 +205,7 @@ if (document.getElementById('gameCanvas')) {
   let runningTimeSpawned = false;
   let runningTimeAcquired = false;
   let boost = 0;
+  let shiftDown = false;
   let reactionActive = false;
   let reactionTimeout;
   let reactionTimer;
@@ -595,8 +602,11 @@ if (document.getElementById('gameCanvas')) {
   const keys = {};
   document.addEventListener('keydown', e => {
     keys[e.code] = true;
-    if (runningTimeAcquired && (e.code === 'ShiftLeft' || e.code === 'ShiftRight') && !e.repeat) {
-      boost = Math.min(boost + 0.5, 3);
+    if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+      shiftDown = true;
+      if (runningTimeAcquired && !e.repeat) {
+        boost = Math.min(boost + 0.5, 3);
+      }
     }
     if (['Space', 'ArrowUp', 'KeyW'].includes(e.code)) {
       if (player.y >= 110 && !player.sliding) {
@@ -633,8 +643,8 @@ if (document.getElementById('gameCanvas')) {
     if (['Space', 'ArrowUp', 'KeyW'].includes(e.code)) {
       jumpActive = false;
     }
-    if (runningTimeAcquired && (e.code === 'ShiftLeft' || e.code === 'ShiftRight')) {
-      boost = 0;
+    if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+      shiftDown = false;
     }
   });
 
@@ -761,11 +771,14 @@ if (document.getElementById('gameCanvas')) {
       canvasShakeX = 0;
     }
     obstacles.forEach(o => o.x -= (2 + boost) * scale);
+    if (!shiftDown && boost > 0) {
+      boost = Math.max(0, boost - 0.05);
+    }
     trees.forEach(t => t.x -= 1);
     if (trees.length && trees[0].x < -20) trees.shift();
     if (obstacles.length && obstacles[0].x + obstacles[0].w < 0) { obstacles.shift(); score++; updateScore(); }
 
-    // boost resets instantly when shift is released
+    // boost gradually decreases when shift is not held
 
     for (let i = obstacles.length - 1; i >= 0; i--) {
       const o = obstacles[i];
