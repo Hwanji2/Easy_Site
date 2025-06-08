@@ -50,24 +50,66 @@ searchInput.addEventListener('keydown', function(e) {
 const startSquare = document.getElementById('startSquare');
 const startArea = document.getElementById('startArea');
 if (startSquare) {
-  let dir = 1, pos = 0;
-  function move() {
-    const limit = startArea.clientWidth - 20;
-    pos += dir * 2;
-    if (pos > limit || pos < 0) dir *= -1;
-    startSquare.style.left = pos + 'px';
-    requestAnimationFrame(move);
+  let cancelled = false;
+  const cells = document.querySelectorAll('.skill-table th, .skill-table td');
+  function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+  async function animateSquare(){
+    let dir = 1, pos = 0;
+    while(!cancelled){
+      const start = performance.now();
+      while(performance.now() - start < 1500 && !cancelled){
+        const limit = startArea.clientWidth - 20;
+        pos += dir * 2;
+        if(pos > limit || pos < 0) dir *= -1;
+        startSquare.style.left = pos + 'px';
+        await sleep(16);
+      }
+      for(const cell of cells){
+        if(cancelled) break;
+        const rect = cell.getBoundingClientRect();
+        startSquare.style.position = 'fixed';
+        startSquare.style.transition = 'transform 0.3s';
+        startSquare.style.transform = `translate(${rect.left + rect.width/2 - 10}px, ${rect.top + rect.height/2 - 10}px)`;
+        await sleep(350);
+      }
+      if(cancelled) break;
+      startSquare.style.transition = 'none';
+      function follow(e){
+        startSquare.style.transform = `translate(${e.clientX - 10}px, ${e.clientY - 10}px)`;
+      }
+      document.addEventListener('pointermove', follow);
+      await sleep(1500);
+      document.removeEventListener('pointermove', follow);
+      startSquare.style.position = 'absolute';
+      startSquare.style.transform = 'translate(0,0)';
+      pos = 0; startSquare.style.left = '0px';
+      await sleep(500);
+    }
   }
-  move();
+  animateSquare();
+
   startSquare.addEventListener('click', () => {
-    document.querySelectorAll('.dev-content').forEach(c => c.classList.remove('active'));
+    cancelled = true;
     const game = document.getElementById('game');
     const canvas = document.getElementById('gameCanvas');
+    document.querySelectorAll('.dev-content').forEach(c => c.classList.remove('active'));
+    if (canvas) {
+      const sq = startSquare.getBoundingClientRect();
+      const cv = canvas.getBoundingClientRect();
+      startSquare.style.position = 'fixed';
+      startSquare.style.left = sq.left + 'px';
+      startSquare.style.top = sq.top + 'px';
+      startSquare.style.transition = 'transform 0.5s, opacity 0.5s';
+      startSquare.style.transform = `translate(${cv.left + cv.width/2 - 10 - sq.left}px, ${cv.top + cv.height/2 - 10 - sq.top}px)`;
+      setTimeout(()=>{ startSquare.style.opacity = 0; }, 500);
+      setTimeout(()=>{ if(startArea) startArea.style.display = 'none'; }, 1000);
+    }
     if (game && canvas) {
       game.classList.add('active');
       canvas.classList.remove('collapsed');
+      canvas.classList.add('flash');
+      setTimeout(()=>canvas.classList.remove('flash'), 600);
     }
-    if (startArea) startArea.style.display = 'none';
     restartGame();
   });
 }
@@ -507,7 +549,7 @@ if (document.getElementById('gameCanvas')) {
   }
 
   function spawnTree() {
-    trees.push({ x: canvas.width + Math.random() * 40, y: 100 + Math.random() * 20, emoji: Math.random() < 0.5 ? '🌲' : '🌳' });
+    trees.push({ x: canvas.width + Math.random() * 40, y: 100 + Math.random() * 20, emoji: '💻' });
   }
 
   function drawIntro() {
