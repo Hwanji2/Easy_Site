@@ -281,26 +281,28 @@ body.light .section-title:not(.red):not(.blue):not(.green):not(.gold) {
   flex-direction: column;
   gap: 20px;
 }
-.dev-tabs {
-  margin-top: 20px;
-  display: flex;
-  gap: 10px;
-}
-.dev-tabs button {
-  padding: 6px 12px;
-  cursor: pointer;
-  border: none;
-  border-radius: 6px;
-  background: linear-gradient(45deg, #3399ff, #66ccff);
-  color: #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  transition: transform 0.2s;
-}
-.dev-tabs button:hover {
-  transform: translateY(-2px);
-}
 .dev-content { display: none; margin-top: 20px; }
 .dev-content.active { display: block; }
+
+#startArea {
+  position: relative;
+  height: 40px;
+  margin-top: 10px;
+}
+#startSquare {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #87ceeb;
+  border: 2px solid #333;
+  animation: squareMove 3s ease-in-out infinite alternate;
+  cursor: pointer;
+}
+@keyframes squareMove {
+  0% { left: 0; transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+ 100% { left: calc(100% - 20px); transform: translateY(0); }
+}
 .calc-buttons {
   display: grid;
   grid-template-columns: repeat(4, 50px);
@@ -458,7 +460,12 @@ body.light .skill-table td {
   border-radius: 4px;
   font-family: 'Press Start 2P', monospace;
   image-rendering: pixelated;
-  transform: rotateX(25deg);
+  transform: rotateX(25deg) scale(1);
+  transform-origin: center;
+  transition: transform 0.5s ease;
+}
+#gameCanvas.collapsed {
+  transform: rotateX(25deg) scale(0.1);
 }
 body.light #gameCanvas {
   background: radial-gradient(#eef, #ccc);

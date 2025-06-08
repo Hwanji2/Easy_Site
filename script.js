@@ -46,15 +46,31 @@ searchInput.addEventListener('keydown', function(e) {
   }
 });
 
-// 개발 탭 기능
-document.querySelectorAll('.dev-tabs button').forEach(btn => {
-  btn.addEventListener('click', () => {
+// 게임 시작 네모
+const startSquare = document.getElementById('startSquare');
+const startArea = document.getElementById('startArea');
+if (startSquare) {
+  let dir = 1, pos = 0;
+  function move() {
+    const limit = startArea.clientWidth - 20;
+    pos += dir * 2;
+    if (pos > limit || pos < 0) dir *= -1;
+    startSquare.style.left = pos + 'px';
+    requestAnimationFrame(move);
+  }
+  move();
+  startSquare.addEventListener('click', () => {
     document.querySelectorAll('.dev-content').forEach(c => c.classList.remove('active'));
-    const target = document.getElementById(btn.dataset.target);
-    if (target) target.classList.add('active');
-    if (btn.dataset.target === 'game') restartGame();
+    const game = document.getElementById('game');
+    const canvas = document.getElementById('gameCanvas');
+    if (game && canvas) {
+      game.classList.add('active');
+      canvas.classList.remove('collapsed');
+    }
+    if (startArea) startArea.style.display = 'none';
+    restartGame();
   });
-});
+}
 
 // 기획 페이지 넘기기
 const book = document.getElementById('book');
@@ -868,54 +884,4 @@ if (audio) {
   load(0);
 }
 
-// 간단한 계산기
-const calc = document.getElementById('calc');
-if (calc) {
-  const display = document.getElementById('calcDisplay');
-  const history = document.getElementById('calcHistory');
-  calc.addEventListener('click', e => {
-    if (e.target.tagName !== 'BUTTON') return;
-    const v = e.target.textContent;
-    if (v === 'C') display.value = '';
-    else if (v === '=') {
-      const result = eval(display.value || '0');
-      if (history) history.insertAdjacentHTML('afterbegin', `<li>${display.value} = ${result}</li>`);
-      display.value = result;
-    }
-    else display.value += v;
-  });
-}
-
-// 간단한 3D 큐브
-if (document.getElementById('cubeCanvas')) {
-  const script = document.createElement('script');
-  script.src = 'https://cdn.jsdelivr.net/npm/three@0.161/build/three.min.js';
-  script.onload = () => {
-    const ctrl = document.createElement('script');
-    ctrl.src = 'https://cdn.jsdelivr.net/npm/three@0.161/examples/js/controls/OrbitControls.js';
-    ctrl.onload = () => {
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, 300/200, 0.1, 1000);
-      const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('cubeCanvas') });
-      renderer.setSize(300, 200);
-      const geometry = new THREE.BoxGeometry();
-      const material = new THREE.MeshNormalMaterial();
-      const cube = new THREE.Mesh(geometry, material);
-      scene.add(cube);
-      camera.position.z = 3;
-      const controls = new THREE.OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-      function animate() {
-        requestAnimationFrame(animate);
-        cube.rotation.x += 0.01;
-        cube.rotation.y += 0.01;
-        controls.update();
-        renderer.render(scene, camera);
-      }
-      animate();
-    };
-    document.head.appendChild(ctrl);
-  };
-  document.head.appendChild(script);
-}
 
