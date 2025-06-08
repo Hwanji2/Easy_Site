@@ -468,10 +468,11 @@ body.light .skill-table td {
   border-radius: 4px;
   font-family: 'Press Start 2P', monospace;
   image-rendering: pixelated;
+  height: 200px;
   transform: rotateX(25deg) scale(1);
-  transform-origin: center;
+  transform-origin: bottom center;
   opacity: 1;
-  transition: transform 0.5s ease, opacity 0.5s ease;
+  transition: transform 0.5s ease, opacity 0.5s ease, height 0.2s ease;
 }
 #gameCanvas.collapsed {
   transform: rotateX(25deg) scale(0.1);
