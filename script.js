@@ -730,7 +730,9 @@ if (document.getElementById('gameCanvas')) {
       canDouble = false;
     }
     const jumpDiff = Math.max(0, floorY - player.y);
-    canvas.style.height = (baseCanvasHeight + jumpDiff).toFixed(0) + 'px';
+    canvas.style.height = baseCanvasHeight + 'px';
+    ctx.save();
+    ctx.translate(0, jumpDiff);
     if (player.y >= 110) {
       if (keys['ArrowDown'] || keys['KeyS']) {
         player.sliding = true;
@@ -866,9 +868,6 @@ if (document.getElementById('gameCanvas')) {
       ctx.restore();
     });
     ctx.restore();
-    ctx.fillStyle = '#000';
-    ctx.font = "12px 'Press Start 2P', monospace";
-    ctx.fillText('Score: ' + score + '  Best: ' + best, 10, 24);
     for (let i = breakPieces.length - 1; i >= 0; i--) {
       const p = breakPieces[i];
       p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.a -= 0.02;
@@ -882,6 +881,10 @@ if (document.getElementById('gameCanvas')) {
       ctx.fillText(p.char, p.x, p.y);
       ctx.restore();
     }
+    ctx.restore();
+    ctx.fillStyle = '#000';
+    ctx.font = "12px 'Press Start 2P', monospace";
+    ctx.fillText('Score: ' + score + '  Best: ' + best, 10, 24);
     frame++;
     requestAnimationFrame(update);
   }
