@@ -542,6 +542,7 @@ if (document.getElementById('gameCanvas')) {
       towerIntroEl.classList.add('hidden');
       introActive = false;
       running = true;
+      update();
     });
   }
 
