@@ -103,15 +103,13 @@
       <tr><th>C++</th><td>★★★☆☆</td></tr>
       <tr><th>Dart</th><td>★★☆☆☆</td></tr>
     </table>
-    <div class="dev-tabs">
-      <button data-target="game">점수 게임</button>
-      <button data-target="obj3d">3D 오브제</button>
-      <button data-target="calc">계산기</button>
+    <div id="startArea">
+      <div id="startSquare"></div>
     </div>
     <div id="game" class="dev-content">
       <div class="game-wrapper">
         <div class="game-area">
-          <canvas id="gameCanvas" width="480" height="200"></canvas>
+          <canvas id="gameCanvas" class="collapsed" width="480" height="200"></canvas>
           <div id="gameOver" class="game-over hidden">
             <div id="finalScore"></div>
             <button id="restartBtn">다시 시작</button>
@@ -126,19 +124,6 @@
         </div>
       </div>
       <p class="game-instr">←→ 또는 A/D 이동, ↑/W 또는 스페이스바로 점프, ↓/S로 슬라이드/빠른 낙하!</p>
-    </div>
-    <div id="obj3d" class="dev-content">
-      <canvas id="cubeCanvas" width="300" height="200"></canvas>
-    </div>
-    <div id="calc" class="dev-content">
-      <input type="text" id="calcDisplay" readonly>
-      <div class="calc-buttons">
-        <button>7</button><button>8</button><button>9</button><button>/</button>
-        <button>4</button><button>5</button><button>6</button><button>*</button>
-        <button>1</button><button>2</button><button>3</button><button>-</button>
-        <button>0</button><button>=</button><button>C</button><button>+</button>
-      </div>
-      <ul id="calcHistory" class="calc-history"></ul>
     </div>
   </section>
 
