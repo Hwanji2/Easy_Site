@@ -283,6 +283,7 @@ body.light .section-title:not(.red):not(.blue):not(.green):not(.gold) {
 }
 .dev-content { display: none; margin-top: 20px; }
 .dev-content.active { display: block; }
+.dev-content.active .side-ui { opacity: 1; }
 
 #startArea {
   position: relative;
@@ -295,13 +296,7 @@ body.light .section-title:not(.red):not(.blue):not(.green):not(.gold) {
   height: 20px;
   background: #87ceeb;
   border: 2px solid #333;
-  animation: squareMove 3s ease-in-out infinite alternate;
   cursor: pointer;
-}
-@keyframes squareMove {
-  0% { left: 0; transform: translateY(0); }
-  50% { transform: translateY(-5px); }
- 100% { left: calc(100% - 20px); transform: translateY(0); }
 }
 .calc-buttons {
   display: grid;
@@ -462,14 +457,23 @@ body.light .skill-table td {
   image-rendering: pixelated;
   transform: rotateX(25deg) scale(1);
   transform-origin: center;
-  transition: transform 0.5s ease;
+  opacity: 1;
+  transition: transform 0.5s ease, opacity 0.5s ease;
 }
 #gameCanvas.collapsed {
   transform: rotateX(25deg) scale(0.1);
+  opacity: 0;
 }
 body.light #gameCanvas {
   background: radial-gradient(#eef, #ccc);
   border-color: #87ceeb;
+}
+.flash {
+  animation: flashAnim 0.3s steps(1) 2;
+}
+@keyframes flashAnim {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(2); }
 }
 .side-ui {
   display: flex;
@@ -477,6 +481,8 @@ body.light #gameCanvas {
   align-items: flex-start;
   font-family: 'Press Start 2P', monospace;
   font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
 }
 .score-display {
   margin-bottom: 6px;
