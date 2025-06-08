@@ -606,7 +606,7 @@ if (document.getElementById('gameCanvas')) {
     keys[e.code] = true;
     if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
       shiftDown = true;
-      if (runningTimeAcquired && !e.repeat) {
+      if (!e.repeat) {
         boost = Math.min(boost + 0.5, 3);
       }
     }
@@ -730,12 +730,10 @@ if (document.getElementById('gameCanvas')) {
       player.vy = 0;
       canDouble = false;
     }
-    const jumpDiff = Math.max(0, floorY - player.y);
-    const targetY = jumpDiff * 0.5;
-    camY += (targetY - camY) * 0.2;
+    camY = 0;
     canvas.style.height = baseCanvasHeight + 'px';
     ctx.save();
-    ctx.translate(0, camY);
+    ctx.translate(0, 0);
     if (player.y >= 110) {
       if (keys['ArrowDown'] || keys['KeyS']) {
         player.sliding = true;
@@ -748,7 +746,9 @@ if (document.getElementById('gameCanvas')) {
       }
     }
 
-    if (frame % Math.max(100 - score, 40) === 0) spawnText();
+    const baseInterval = Math.max(100 - score, 40);
+    const interval = Math.max(baseInterval - boost * 10, 10);
+    if (frame % Math.floor(interval) === 0) spawnText();
     if (frame % 200 === 0 && Math.random() < 0.3) spawnHeart();
     if (frame % 60 === 0) spawnTree();
 
