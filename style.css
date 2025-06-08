@@ -297,6 +297,7 @@ body.light .section-title:not(.red):not(.blue):not(.green):not(.gold) {
   background: #87ceeb;
   border: 2px solid #333;
   cursor: pointer;
+  box-shadow: 0 0 6px #87ceeb;
 }
 .calc-buttons {
   display: grid;
@@ -449,6 +450,18 @@ body.light .skill-table td {
   perspective: 600px;
 }
 .game-area { position: relative; }
+#codeBg {
+  position: absolute;
+  inset: 0;
+  padding: 4px;
+  color: #87ceeb;
+  opacity: 0.1;
+  font-size: 10px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  pointer-events: none;
+  overflow: hidden;
+}
 #gameCanvas {
   background: radial-gradient(#011, #000);
   border: 1px solid #87ceeb;

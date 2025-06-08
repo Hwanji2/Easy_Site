@@ -51,10 +51,12 @@ const startSquare = document.getElementById('startSquare');
 const startArea = document.getElementById('startArea');
 if (startSquare) {
   let cancelled = false;
-  const cells = document.querySelectorAll('.skill-table th, .skill-table td');
+  const develop = document.getElementById('develop');
+  const cells = document.querySelectorAll('#develop .skill-table th, #develop .skill-table td');
   function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
   async function animateSquare(){
     let dir = 1, pos = 0;
+    await sleep(4000);
     while(!cancelled){
       const start = performance.now();
       while(performance.now() - start < 1500 && !cancelled){
@@ -75,11 +77,14 @@ if (startSquare) {
       if(cancelled) break;
       startSquare.style.transition = 'none';
       function follow(e){
-        startSquare.style.transform = `translate(${e.clientX - 10}px, ${e.clientY - 10}px)`;
+        const r = develop.getBoundingClientRect();
+        const x = Math.min(r.right - 20, Math.max(r.left, e.clientX)) - 10;
+        const y = Math.min(r.bottom - 20, Math.max(r.top, e.clientY)) - 10;
+        startSquare.style.transform = `translate(${x}px, ${y}px)`;
       }
-      document.addEventListener('pointermove', follow);
+      develop.addEventListener('pointermove', follow);
       await sleep(1500);
-      document.removeEventListener('pointermove', follow);
+      develop.removeEventListener('pointermove', follow);
       startSquare.style.position = 'absolute';
       startSquare.style.transform = 'translate(0,0)';
       pos = 0; startSquare.style.left = '0px';
@@ -151,6 +156,19 @@ if (document.getElementById('gameCanvas')) {
   const texts = Array.from(document.querySelectorAll('#about .item'))
     .map(el => el.textContent.trim())
     .filter(t => t.length > 0);
+  const codeBg = document.getElementById('codeBg');
+  let codeInterval = null;
+  const codeString = `function update() {\n  // runner game code\n}`;
+  function startCodeTyping(){
+    if(!codeBg) return;
+    clearInterval(codeInterval);
+    codeBg.textContent = '';
+    let idx = 0;
+    codeInterval = setInterval(()=>{
+      codeBg.textContent += codeString[idx];
+      idx = (idx + 1) % codeString.length;
+    }, 60);
+  }
   const player = { x: 30, y: 110, w: 20, h: 20, vy: 0, sliding: false };
   let jumpActive = false;
   let jumpTimer = 0;
@@ -165,6 +183,8 @@ if (document.getElementById('gameCanvas')) {
   let widthAnim = 0;
   let nextWidthScore = 50;
   let nextThemeScore = 100;
+  let nextMoveScore = 30;
+  let canvasTx = 0, canvasTy = 0, canvasScale = 1;
   const maxHearts = 3;
   let hearts = maxHearts;
   const cardGameEl = document.getElementById('cardGame');
@@ -701,6 +721,7 @@ if (document.getElementById('gameCanvas')) {
     } else {
       canvas.style.width = '480px';
     }
+    canvas.style.transform = `rotateX(25deg) translate(${canvasTx}px, ${canvasTy}px) scale(${canvasScale})`;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const scale = 1 + Math.min(score / 100, 2);
     if (keys['ArrowLeft'] || keys['KeyA']) player.x = Math.max(0, player.x - 2 * scale);
@@ -734,6 +755,12 @@ if (document.getElementById('gameCanvas')) {
     if (frame % 60 === 0) spawnTree();
 
     if (score >= nextWidthScore) { nextWidthScore += 50; widthAnim = 100; }
+    if (score >= nextMoveScore) {
+      nextMoveScore += 30;
+      canvasTx = Math.random()*40 - 20;
+      canvasTy = Math.random()*20 - 10;
+      canvasScale = 1 + (Math.random()*0.4 - 0.2);
+    }
     if (score >= nextThemeScore) {
       nextThemeScore += 100;
       document.body.classList.toggle('dark');
@@ -798,15 +825,21 @@ if (document.getElementById('gameCanvas')) {
       }
     }
 
+    const glow = 5 + 3 * Math.sin(frame / 10);
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 130, canvas.width, 20);
     ctx.font = "20px 'Press Start 2P', monospace";
+    ctx.save();
+    ctx.shadowColor = '#87ceeb';
+    ctx.shadowBlur = glow;
     trees.forEach(t => ctx.fillText(t.emoji, t.x, t.y));
     ctx.fillStyle = '#3399ff';
     ctx.fillRect(player.x, player.y, player.w, player.h);
     ctx.fillStyle = '#ff5555';
     obstacles.forEach(o => {
       ctx.save();
+      ctx.shadowColor = '#87ceeb';
+      ctx.shadowBlur = glow;
       if (o.type === 'text') {
         ctx.font = fontSize + "px 'Press Start 2P', monospace";
         for (let i = 0; i < o.text.length; i++) {
@@ -822,6 +855,7 @@ if (document.getElementById('gameCanvas')) {
       }
       ctx.restore();
     });
+    ctx.restore();
     ctx.fillStyle = '#000';
     ctx.font = "12px 'Press Start 2P', monospace";
     ctx.fillText('Score: ' + score + '  Best: ' + best, 10, 24);
@@ -830,6 +864,8 @@ if (document.getElementById('gameCanvas')) {
       p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.a -= 0.02;
       if (p.a <= 0) { breakPieces.splice(i,1); continue; }
       ctx.save();
+      ctx.shadowColor = '#87ceeb';
+      ctx.shadowBlur = glow;
       ctx.globalAlpha = p.a;
       ctx.fillStyle = '#ff5555';
       ctx.font = fontSize + "px 'Press Start 2P', monospace";
@@ -856,6 +892,8 @@ if (document.getElementById('gameCanvas')) {
     cardGameShown = false;
     breakPieces.length = 0;
     if (inventory) inventory.innerHTML = '';
+    canvasTx = 0; canvasTy = 0; canvasScale = 1; nextMoveScore = 30;
+    startCodeTyping();
     renderHearts();
     updateScore();
     if (gameOverEl) gameOverEl.classList.add('hidden');
