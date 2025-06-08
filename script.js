@@ -52,6 +52,7 @@ document.querySelectorAll('.dev-tabs button').forEach(btn => {
     document.querySelectorAll('.dev-content').forEach(c => c.classList.remove('active'));
     const target = document.getElementById(btn.dataset.target);
     if (target) target.classList.add('active');
+    if (btn.dataset.target === 'game') restartGame();
   });
 });
 
@@ -98,10 +99,14 @@ if (document.getElementById('gameCanvas')) {
   const maxJumpTime = 15;
   let canDouble = false;
   const obstacles = [];
+  const trees = [];
   const fontSize = 24;
   let frame = 0;
   let score = 0;
   let best = parseInt(localStorage.getItem('highscore') || '0');
+  let widthAnim = 0;
+  let nextWidthScore = 50;
+  let nextThemeScore = 100;
   const maxHearts = 3;
   let hearts = maxHearts;
   const cardGameEl = document.getElementById('cardGame');
@@ -485,6 +490,10 @@ if (document.getElementById('gameCanvas')) {
     obstacles.push({ type: 'running', x: canvas.width, y: 100, w: 20, h: 20 });
   }
 
+  function spawnTree() {
+    trees.push({ x: canvas.width + Math.random() * 40, y: 100 + Math.random() * 20, emoji: Math.random() < 0.5 ? '🌲' : '🌳' });
+  }
+
   function drawIntro() {
     if (!introCtx || !introActive || introPhase !== 1) return;
     const spd = 1.5;
@@ -519,31 +528,9 @@ if (document.getElementById('gameCanvas')) {
   }
 
   function startTowerIntro() {
-    if (!towerIntroEl) { running = true; return; }
-    running = false;
-    visitCount++;
-    localStorage.setItem('towerVisits', visitCount);
-    introActive = true;
-    introStep = 0;
-    if (introMsg) introMsg.classList.remove('hidden');
-    if (startTowerBtn) startTowerBtn.classList.add('hidden');
-    towerIntroEl.classList.remove('hidden');
-    nextIntro();
-  }
-
-  if (towerIntroEl) {
-    towerIntroEl.addEventListener('pointerdown', () => {
-      // prevent accidental skip while options are visible
-    });
-  }
-
-  if (startTowerBtn) {
-    startTowerBtn.addEventListener('click', () => {
-      towerIntroEl.classList.add('hidden');
-      introActive = false;
-      running = true;
-      update();
-    });
+    explodeCanvas();
+    running = true;
+    update();
   }
 
   const keys = {};
@@ -649,6 +636,13 @@ if (document.getElementById('gameCanvas')) {
 
   function update() {
     if (!running) return;
+    if (widthAnim > 0) {
+      const progress = Math.sin((100 - widthAnim) / 100 * Math.PI);
+      canvas.style.width = (480 + 40 * progress).toFixed(0) + 'px';
+      widthAnim--;
+    } else {
+      canvas.style.width = '480px';
+    }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const scale = 1 + Math.min(score / 100, 2);
     if (keys['ArrowLeft'] || keys['KeyA']) player.x = Math.max(0, player.x - 2 * scale);
@@ -679,26 +673,17 @@ if (document.getElementById('gameCanvas')) {
 
     if (frame % Math.max(100 - score, 40) === 0) spawnText();
     if (frame % 200 === 0 && Math.random() < 0.3) spawnHeart();
-    if (score >= 5 && !cardGameShown) {
-      cardGameShown = true;
-      startCardGame();
-      return;
-    }
-    if (score >= 10 && !reactionGameStarted) {
-      reactionGameStarted = true;
-      startReactionGame();
-      return;
-    }
-    if (score >= 15 && !runningTimeSpawned && !runningTimeAcquired) {
-      spawnRunningItem();
-      runningTimeSpawned = true;
-    }
-    if (score >= 20 && !linePuzzleStarted) {
-      linePuzzleStarted = true;
-      startLinePuzzle();
-      return;
+    if (frame % 60 === 0) spawnTree();
+
+    if (score >= nextWidthScore) { nextWidthScore += 50; widthAnim = 100; }
+    if (score >= nextThemeScore) {
+      nextThemeScore += 100;
+      document.body.classList.toggle('dark');
+      document.body.classList.toggle('light');
     }
     obstacles.forEach(o => o.x -= (2 + boost) * scale);
+    trees.forEach(t => t.x -= 1);
+    if (trees.length && trees[0].x < -20) trees.shift();
     if (obstacles.length && obstacles[0].x + obstacles[0].w < 0) { obstacles.shift(); score++; updateScore(); }
 
     if (decel) {
@@ -757,6 +742,8 @@ if (document.getElementById('gameCanvas')) {
 
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 130, canvas.width, 20);
+    ctx.font = "20px 'Press Start 2P', monospace";
+    trees.forEach(t => ctx.fillText(t.emoji, t.x, t.y));
     ctx.fillStyle = '#3399ff';
     ctx.fillRect(player.x, player.y, player.w, player.h);
     ctx.fillStyle = '#ff5555';
@@ -819,7 +806,6 @@ if (document.getElementById('gameCanvas')) {
   }
   if (restartBtn) restartBtn.addEventListener('click', restartGame);
 
-  startTowerIntro();
 }
 
 // 오디오 볼륨 제어
