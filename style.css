@@ -516,6 +516,7 @@ body.light .score-block {
   align-items: center;
 }
 .game-over button { margin-top: 10px; padding: 6px 12px; }
+.overlay #startTowerBtn { margin-top: 10px; padding: 6px 12px; }
 .game-over.hidden { display: none; }
 .game-instr { margin-top: 5px; font-size: 0.9rem; }
 
@@ -583,6 +584,8 @@ body.light .card-grid .card { background: #fff; border-color: #87ceeb; }
 }
 #lineCanvas { background: #111; border: 1px solid #87ceeb; }
 body.light #lineCanvas { background: #eee; border-color: #87ceeb; }
+#introCanvas { background: #111; border: 1px solid #87ceeb; margin-bottom: 10px; }
+body.light #introCanvas { background: #eee; border-color: #87ceeb; }
 
 .shake {
   animation: shake 0.3s;

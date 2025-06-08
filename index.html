@@ -112,6 +112,11 @@
       <div class="game-wrapper">
         <div class="game-area">
           <canvas id="gameCanvas" width="360" height="160"></canvas>
+          <div id="towerIntro" class="overlay hidden">
+            <canvas id="introCanvas" width="360" height="160"></canvas>
+            <div id="introMsg" class="start-msg"></div>
+            <button id="startTowerBtn" class="hidden">탑 오르기</button>
+          </div>
           <div id="cardGame" class="overlay hidden">
             <div id="cardStartMsg" class="start-msg">아무 곳이나 누르면 시작</div>
             <div id="cardGrid" class="card-grid"></div>

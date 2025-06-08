@@ -108,6 +108,11 @@ if (document.getElementById('gameCanvas')) {
   const cardGrid = document.getElementById('cardGrid');
   const cardTimerEl = document.getElementById('cardTimer');
   const cardStartMsg = document.getElementById('cardStartMsg');
+  const towerIntroEl = document.getElementById('towerIntro');
+  const introCanvas = document.getElementById('introCanvas');
+  const introCtx = introCanvas ? introCanvas.getContext('2d') : null;
+  const introMsg = document.getElementById('introMsg');
+  const startTowerBtn = document.getElementById('startTowerBtn');
   const linePuzzleEl = document.getElementById('linePuzzle');
   const lineCanvas = document.getElementById('lineCanvas');
   const lineCtx = lineCanvas ? lineCanvas.getContext('2d') : null;
@@ -132,6 +137,11 @@ if (document.getElementById('gameCanvas')) {
   let reactionTimeout;
   let reactionTimer;
   let reactionStart = 0;
+  let visitCount = parseInt(localStorage.getItem('towerVisits') || '0');
+  let introActive = false;
+  let introPhase = 0;
+  const introPlayer = { x: 180, y: 120 };
+  const introNpc = { x: 180, y: 60 };
 
   function renderHearts() {
     if (!heartContainer) return;
@@ -371,6 +381,69 @@ if (document.getElementById('gameCanvas')) {
 
   function spawnRunningItem() {
     obstacles.push({ type: 'running', x: canvas.width, y: 100, w: 20, h: 20 });
+  }
+
+  function drawIntro() {
+    if (!introCtx || !introActive || introPhase !== 1) return;
+    const spd = 1.5;
+    if (keys['ArrowLeft'] || keys['KeyA']) introPlayer.x -= spd;
+    if (keys['ArrowRight'] || keys['KeyD']) introPlayer.x += spd;
+    if (keys['ArrowUp'] || keys['KeyW']) introPlayer.y -= spd;
+    if (keys['ArrowDown'] || keys['KeyS']) introPlayer.y += spd;
+    introPlayer.x = Math.max(5, Math.min(introCanvas.width - 5, introPlayer.x));
+    introPlayer.y = Math.max(5, Math.min(introCanvas.height - 5, introPlayer.y));
+    introCtx.fillStyle = '#222';
+    introCtx.fillRect(0, 0, introCanvas.width, introCanvas.height);
+    introCtx.fillStyle = '#999';
+    introCtx.fillRect(introNpc.x - 6, introNpc.y - 6, 12, 12);
+    introCtx.fillStyle = '#3399ff';
+    introCtx.fillRect(introPlayer.x - 5, introPlayer.y - 5, 10, 10);
+    if (Math.hypot(introPlayer.x - introNpc.x, introPlayer.y - introNpc.y) < 12) {
+      introPhase = 2;
+      if (introMsg) {
+        introMsg.textContent =
+          '게임의 탑에 온걸 환영한다! 선택받은 인간으로서 낙원에 가려면 게임의 탑을 올라야 한다. 탑은 총 10층이다. 오르겠는가?';
+        introMsg.classList.remove('hidden');
+      }
+      if (startTowerBtn) startTowerBtn.classList.remove('hidden');
+      return;
+    }
+    requestAnimationFrame(drawIntro);
+  }
+
+  function startTowerIntro() {
+    if (!towerIntroEl) { startCardGame(); return; }
+    visitCount++;
+    localStorage.setItem('towerVisits', visitCount);
+    introPhase = 0;
+    introActive = true;
+    introPlayer.x = 180;
+    introPlayer.y = 120;
+    if (introMsg) {
+      introMsg.textContent = visitCount === 1 ? '반가워요' : `벌써 ${visitCount}번째네요`;
+      introMsg.classList.remove('hidden');
+    }
+    if (startTowerBtn) startTowerBtn.classList.add('hidden');
+    towerIntroEl.classList.remove('hidden');
+  }
+
+  if (towerIntroEl) {
+    towerIntroEl.addEventListener('pointerdown', () => {
+      if (introPhase === 0) {
+        introPhase = 1;
+        if (introMsg) introMsg.classList.add('hidden');
+        requestAnimationFrame(drawIntro);
+      }
+    });
+  }
+
+  if (startTowerBtn) {
+    startTowerBtn.addEventListener('click', () => {
+      towerIntroEl.classList.add('hidden');
+      introActive = false;
+      running = true;
+      startCardGame();
+    });
   }
 
   const keys = {};
@@ -636,11 +709,11 @@ if (document.getElementById('gameCanvas')) {
     updateScore();
     if (gameOverEl) gameOverEl.classList.add('hidden');
     running = true;
-    startCardGame();
+    startTowerIntro();
   }
   if (restartBtn) restartBtn.addEventListener('click', restartGame);
 
-  startCardGame();
+  startTowerIntro();
 }
 
 // 오디오 볼륨 제어
