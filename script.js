@@ -130,6 +130,7 @@ if (book && pages.length) {
 if (document.getElementById('gameCanvas')) {
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
+  const baseCanvasHeight = canvas.clientHeight || canvas.height;
   ctx.textBaseline = 'top';
   const texts = Array.from(document.querySelectorAll('#about .item'))
     .map(el => el.textContent.trim())
@@ -728,6 +729,8 @@ if (document.getElementById('gameCanvas')) {
       player.vy = 0;
       canDouble = false;
     }
+    const jumpDiff = Math.max(0, floorY - player.y);
+    canvas.style.height = (baseCanvasHeight + jumpDiff).toFixed(0) + 'px';
     if (player.y >= 110) {
       if (keys['ArrowDown'] || keys['KeyS']) {
         player.sliding = true;
@@ -842,20 +845,23 @@ if (document.getElementById('gameCanvas')) {
     ctx.fillStyle = '#ff5555';
     obstacles.forEach(o => {
       ctx.save();
-      ctx.shadowColor = '#ffaaaa';
       ctx.shadowBlur = glow;
-      if (o.type === 'text') {
-        ctx.font = fontSize + "px 'Press Start 2P', monospace";
-        for (let i = 0; i < o.text.length; i++) {
-          ctx.fillText(o.text[i], o.x, o.y + fontSize * (i + 1));
-        }
-      } else if (o.type === 'heart') {
+      if (o.type === 'heart') {
+        ctx.shadowColor = '#3399ff';
         ctx.font = '16px \"Press Start 2P\", monospace';
         ctx.fillText('💙', o.x, o.y);
-      } else if (o.type === 'running') {
-        ctx.fillStyle = '#3399ff';
-        ctx.font = '12px \"Press Start 2P\", monospace';
-        ctx.fillText('RT', o.x, o.y);
+      } else {
+        ctx.shadowColor = '#ffaaaa';
+        if (o.type === 'text') {
+          ctx.font = fontSize + "px 'Press Start 2P', monospace";
+          for (let i = 0; i < o.text.length; i++) {
+            ctx.fillText(o.text[i], o.x, o.y + fontSize * (i + 1));
+          }
+        } else if (o.type === 'running') {
+          ctx.fillStyle = '#3399ff';
+          ctx.font = '12px \"Press Start 2P\", monospace';
+          ctx.fillText('RT', o.x, o.y);
+        }
       }
       ctx.restore();
     });
@@ -897,6 +903,7 @@ if (document.getElementById('gameCanvas')) {
     if (inventory) inventory.innerHTML = '';
     canvasTx = 0; canvasTy = 0; canvasScale = 1; nextMoveScore = 30;
     nextShakeScore = 110; shakeFrames = 0; canvasShakeX = 0;
+    canvas.style.height = baseCanvasHeight + 'px';
     startCodeTyping();
     renderHearts();
     updateScore();
