@@ -879,6 +879,39 @@ body.light .audio-player input[type=range]::-webkit-slider-thumb {
 .volume-popup.show {
   opacity: 1;
 }
+
+.volume-box {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, -10px);
+  background: rgba(0, 0, 0, 0.8);
+  padding: 8px;
+  border-radius: 6px;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+.volume-box.show {
+  display: flex;
+}
+.vol-btn {
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 6px;
+}
+.vol-btn:hover {
+  background: #3a8b3a;
+}
+.vol-label {
+  font-size: 0.8rem;
+  margin-left: 4px;
+}
 .calc-history {
   margin-top: 10px;
   max-height: 100px;
