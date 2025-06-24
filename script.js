@@ -982,6 +982,8 @@ if (audio) {
   const nextBtn = document.getElementById('nextTrack');
   const bar = document.querySelector('.progress-bar-audio');
   const progress = bar.querySelector('.progress');
+  const waveform = document.getElementById('waveform');
+  const waveCtx = waveform ? waveform.getContext('2d') : null;
   const list = document.querySelectorAll('.playlist li');
   const tracks = Array.from(list).map(li => li.dataset.src);
   let trackIndex = 0;
@@ -996,12 +998,34 @@ if (audio) {
 
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const source = ctx.createMediaElementSource(audio);
+  const analyser = ctx.createAnalyser();
+  analyser.fftSize = 256;
   const merger = ctx.createChannelMerger(2);
   const gainL = ctx.createGain();
   const gainR = ctx.createGain();
-  source.connect(gainL).connect(merger, 0, 0);
-  source.connect(gainR).connect(merger, 0, 1);
+  source.connect(analyser);
+  analyser.connect(gainL).connect(merger, 0, 0);
+  analyser.connect(gainR).connect(merger, 0, 1);
   merger.connect(ctx.destination);
+
+  function drawWave() {
+    if (!waveCtx || !waveform) return;
+    requestAnimationFrame(drawWave);
+    const bufferLength = analyser.fftSize;
+    const data = new Uint8Array(bufferLength);
+    analyser.getByteTimeDomainData(data);
+    waveCtx.clearRect(0, 0, waveform.width, waveform.height);
+    waveCtx.strokeStyle = '#4caf50';
+    waveCtx.beginPath();
+    for (let i = 0; i < bufferLength; i++) {
+      const x = i / bufferLength * waveform.width;
+      const y = (1 - data[i] / 255) * waveform.height;
+      if (i === 0) waveCtx.moveTo(x, y);
+      else waveCtx.lineTo(x, y);
+    }
+    waveCtx.stroke();
+  }
+  drawWave();
 
   playBtn.addEventListener('click', () => {
     if (audio.paused) { audio.play(); playBtn.textContent = '⏸'; }
@@ -1027,6 +1051,18 @@ if (audio) {
   });
   right.addEventListener('input', () => {
     gainR.gain.value = master.value * right.value;
+  });
+
+  const soundSection = document.getElementById('sound');
+  let soundVisible = false;
+  if (soundSection) {
+    const obs = new IntersectionObserver(e => { soundVisible = e[0].isIntersecting; }, { threshold: 0.5 });
+    obs.observe(soundSection);
+  }
+  document.addEventListener('keydown', e => {
+    if (!soundVisible) return;
+    if (e.code === 'ArrowRight') { load(trackIndex + 1); }
+    if (e.code === 'ArrowLeft') { load(trackIndex - 1); }
   });
   load(0);
 }

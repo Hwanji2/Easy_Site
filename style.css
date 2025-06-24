@@ -755,6 +755,12 @@ body.light #introCanvas { background: #eee; border-color: #87ceeb; }
   padding: 10px;
   border-radius: 8px;
 }
+.audio-player canvas {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  width: 300px;
+  height: 60px;
+}
 .progress-bar-audio {
   width: 200px;
   height: 8px;
@@ -815,6 +821,10 @@ body.light .audio-player input[type=range]::-webkit-slider-thumb {
   background: #4caf50;
   color: #fff;
   border-radius: 4px;
+}
+.album-title {
+  margin-top: 15px;
+  font-weight: bold;
 }
 .calc-history {
   margin-top: 10px;
