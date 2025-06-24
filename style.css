@@ -114,8 +114,8 @@ body.light nav a.active {
 }
 body.light .nav-left a:hover,
 body.light .nav-left a.active {
-  color: #333;
-  text-shadow: none;
+  color: #000;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 #themeToggle {
@@ -387,16 +387,39 @@ body.light footer a:hover {
   width: 100%;
   margin-top: 20px;
   border-collapse: collapse;
+  border: 1px solid #555;
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 0.95rem;
 }
 .skill-table th,
 .skill-table td {
-  border: 1px solid #666;
-  padding: 6px 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #555;
   text-align: left;
+}
+.skill-table th {
+  background: rgba(255, 255, 255, 0.05);
+}
+.skill-table tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
+}
+.skill-table tr:last-child th,
+.skill-table tr:last-child td {
+  border-bottom: none;
+}
+body.light .skill-table {
+  border-color: #ddd;
 }
 body.light .skill-table th,
 body.light .skill-table td {
-  border-color: #ccc;
+  border-bottom-color: #eee;
+}
+body.light .skill-table th {
+  background: #f7f7f7;
+}
+body.light .skill-table tr:nth-child(even) {
+  background: #fafafa;
 }
 
 .etc-foot {
