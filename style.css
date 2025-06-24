@@ -104,8 +104,9 @@ body.light nav a:hover {
 }
 .nav-left a:hover,
 .nav-left a.active {
-  background: linear-gradient(45deg, #3399ff, #ff00ff);
+  background: none;
   color: #fff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
 }
 body.light .nav-left a:hover,
 body.light .nav-left a.active {
