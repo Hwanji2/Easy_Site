@@ -9,6 +9,13 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.1 });
 sections.forEach(sec => observer.observe(sec));
 
+// 개발 경로(/dev 또는 /개발)로 지정한 경우
+const path = decodeURIComponent(window.location.pathname);
+if (path.endsWith('/dev') || path.endsWith('/개발')) {
+  const devSection = document.getElementById('develop');
+  devSection?.scrollIntoView();
+}
+
 // 라이트/다크 모드 초기 적용
 const themeToggle = document.getElementById('themeToggle');
 const hour = new Date().getHours();
