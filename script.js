@@ -986,12 +986,15 @@ if (audio) {
   const waveCtx = waveform ? waveform.getContext('2d') : null;
   const list = document.querySelectorAll('.playlist li');
   const tracks = Array.from(list).map(li => li.dataset.src);
+  const imgs = Array.from(list).map(li => li.dataset.img);
+  const albumImg = document.getElementById('albumArt');
   let trackIndex = 0;
   function load(i) {
     trackIndex = (i + tracks.length) % tracks.length;
     audio.src = tracks[trackIndex];
     list.forEach(li => li.classList.remove('active'));
     list[trackIndex].classList.add('active');
+    if (albumImg) albumImg.src = imgs[trackIndex];
     if (!audio.paused) audio.play();
   }
   list.forEach((li, idx) => li.addEventListener('click', () => load(idx)));
