@@ -891,4 +891,5 @@ body.light .progress-bar-audio { background: #b5d7b5; }
   height: 80px;
   writing-mode: bt-lr;
   -webkit-appearance: slider-vertical;
+  accent-color: #4caf50;
 }
