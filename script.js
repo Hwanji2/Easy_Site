@@ -1003,10 +1003,11 @@ if (audio) {
   const merger = ctx.createChannelMerger(2);
   const gainL = ctx.createGain();
   const gainR = ctx.createGain();
+  const gainMaster = ctx.createGain();
   source.connect(analyser);
   analyser.connect(gainL).connect(merger, 0, 0);
   analyser.connect(gainR).connect(merger, 0, 1);
-  merger.connect(ctx.destination);
+  merger.connect(gainMaster).connect(ctx.destination);
 
   function drawWave() {
     if (!waveCtx || !waveform) return;
@@ -1041,6 +1042,34 @@ if (audio) {
     const pct = (e.clientX - rect.left) / rect.width;
     audio.currentTime = pct * audio.duration;
   });
+
+  const volToggle = document.getElementById('volToggle');
+  const volLeft = document.getElementById('volLeft');
+  const volRight = document.getElementById('volRight');
+  const volLeftRange = document.getElementById('volumeLeft');
+  const volRightRange = document.getElementById('volumeRight');
+  const volMasterRange = document.getElementById('volumeMaster');
+  if (volToggle) {
+    volToggle.addEventListener('click', () => {
+      volLeft.classList.toggle('open');
+      volRight.classList.toggle('open');
+    });
+  }
+  if (volLeftRange) {
+    volLeftRange.addEventListener('input', () => {
+      gainL.gain.value = parseFloat(volLeftRange.value);
+    });
+  }
+  if (volRightRange) {
+    volRightRange.addEventListener('input', () => {
+      gainR.gain.value = parseFloat(volRightRange.value);
+    });
+  }
+  if (volMasterRange) {
+    volMasterRange.addEventListener('input', () => {
+      gainMaster.gain.value = parseFloat(volMasterRange.value);
+    });
+  }
 
 
   const soundSection = document.getElementById('sound');
