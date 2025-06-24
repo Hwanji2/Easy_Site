@@ -748,21 +748,50 @@ body.light #introCanvas { background: #eee; border-color: #87ceeb; }
 /* Custom audio player */
 .audio-player {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 10px;
   margin-top: 20px;
   background: rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  border-radius: 12px;
+  width: 280px;
+}
+.player-upper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.1);
   padding: 10px;
   border-radius: 8px;
+  width: 100%;
+  justify-content: center;
+}
+.album-art {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+.volume-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+.lr-volume {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 .audio-player canvas {
   background: rgba(0, 0, 0, 0.3);
   border-radius: 4px;
-  width: 300px;
+  width: 100%;
   height: 60px;
 }
 .progress-bar-audio {
-  width: 200px;
+  width: 100%;
   height: 8px;
   background: #355b35;
   border-radius: 4px;
@@ -804,6 +833,10 @@ body.light .progress-bar-audio { background: #b5d7b5; }
 }
 body.light .audio-player input[type=range] {
   background: #c8eac8;
+}
+.control-buttons {
+  display: flex;
+  gap: 10px;
 }
 body.light .audio-player input[type=range]::-webkit-slider-thumb {
   background: #5cbf5c;
