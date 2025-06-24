@@ -971,17 +971,9 @@ if (document.getElementById('gameCanvas')) {
 
 }
 
-// 오디오 볼륨 제어
+// 오디오 재생
 const audio = document.getElementById('audio');
 if (audio) {
-  const master = document.getElementById('masterVolume');
-  const left = document.getElementById('leftVolume');
-  const right = document.getElementById('rightVolume');
-  const volumeBtn = document.getElementById('volumeBtn');
-  const volumeBox = document.getElementById('volumeBox');
-  const masterLabel = document.getElementById('masterLabel');
-  const leftLabel = document.getElementById('leftLabel');
-  const rightLabel = document.getElementById('rightLabel');
   const playBtn = document.getElementById('playPause');
   const prevBtn = document.getElementById('prevTrack');
   const nextBtn = document.getElementById('nextTrack');
@@ -1050,37 +1042,6 @@ if (audio) {
     audio.currentTime = pct * audio.duration;
   });
 
-  const volumePopup = document.getElementById('volumePopup');
-  let hidePopupId = null;
-  function showVolume() {
-    if (!volumePopup) return;
-    volumePopup.textContent = `M ${Math.round(master.value * 100)}% | L ${Math.round(left.value * 100)}% | R ${Math.round(right.value * 100)}%`;
-    volumePopup.classList.add('show');
-    clearTimeout(hidePopupId);
-    hidePopupId = setTimeout(() => volumePopup.classList.remove('show'), 800);
-  }
-  function showVolumeBox() {
-    if (!volumeBox) return;
-    volumeBox.classList.add('show');
-    clearTimeout(hidePopupId);
-    hidePopupId = setTimeout(() => volumeBox.classList.remove('show'), 2000);
-  }
-  function updateLabels() {
-    if (masterLabel) masterLabel.textContent = Math.round(master.value * 100) + '%';
-    if (leftLabel) leftLabel.textContent = Math.round(left.value * 100) + '%';
-    if (rightLabel) rightLabel.textContent = Math.round(right.value * 100) + '%';
-  }
-  function updateVolume() {
-    gainL.gain.value = master.value * left.value;
-    gainR.gain.value = master.value * right.value;
-    updateLabels();
-    showVolume();
-    showVolumeBox();
-  }
-  if (volumeBtn) volumeBtn.addEventListener('click', showVolumeBox);
-  master.addEventListener('input', updateVolume);
-  left.addEventListener('input', updateVolume);
-  right.addEventListener('input', updateVolume);
 
   const soundSection = document.getElementById('sound');
   let soundVisible = false;
@@ -1090,19 +1051,10 @@ if (audio) {
   }
   document.addEventListener('keydown', e => {
     if (!soundVisible) return;
-    if (volumeBox && volumeBox.classList.contains('show')) {
-      if (e.code === 'ArrowUp') { master.value = Math.min(1, parseFloat(master.value) + 0.05); updateVolume(); e.preventDefault(); }
-      else if (e.code === 'ArrowDown') { master.value = Math.max(0, parseFloat(master.value) - 0.05); updateVolume(); e.preventDefault(); }
-      else if (e.code === 'ArrowLeft') { left.value = Math.max(0, parseFloat(left.value) - 0.05); updateVolume(); e.preventDefault(); }
-      else if (e.code === 'ArrowRight') { right.value = Math.min(1, parseFloat(right.value) + 0.05); updateVolume(); e.preventDefault(); }
-    } else {
-      if (e.code === 'ArrowRight') { load(trackIndex + 1); }
-      else if (e.code === 'ArrowLeft') { load(trackIndex - 1); }
-      else if (e.code === 'ArrowUp' || e.code === 'ArrowDown') { showVolumeBox(); }
-    }
+    if (e.code === 'ArrowRight') { load(trackIndex + 1); }
+    else if (e.code === 'ArrowLeft') { load(trackIndex - 1); }
   });
   load(0);
-  updateLabels();
 }
 
 
