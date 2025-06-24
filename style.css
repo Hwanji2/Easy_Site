@@ -855,3 +855,40 @@ body.light .progress-bar-audio { background: #b5d7b5; }
   color: #3399ff;
 }
 .inventory .card:hover { background: #ddd; }
+
+/* volume control */
+.vol-toggle {
+  position: absolute;
+  top: 50%;
+  right: -28px;
+  transform: translateY(-50%);
+  background: #4caf50;
+  border: none;
+  color: #fff;
+  border-radius: 10px;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+.vol-popup {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) scale(0);
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 8px 6px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: transform 0.3s;
+}
+.vol-popup.open { transform: translateY(-50%) scale(1); }
+.vol-popup.left { left: -50px; }
+.vol-popup.right { right: -50px; }
+.vol-popup input[type="range"] {
+  width: 8px;
+  height: 80px;
+  writing-mode: bt-lr;
+  -webkit-appearance: slider-vertical;
+}
