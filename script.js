@@ -1045,16 +1045,23 @@ if (audio) {
     audio.currentTime = pct * audio.duration;
   });
 
-  master.addEventListener('input', () => {
+  const volumePopup = document.getElementById('volumePopup');
+  let hidePopupId = null;
+  function showVolume() {
+    if (!volumePopup) return;
+    volumePopup.textContent = Math.round(master.value * 100) + '%';
+    volumePopup.classList.add('show');
+    clearTimeout(hidePopupId);
+    hidePopupId = setTimeout(() => volumePopup.classList.remove('show'), 800);
+  }
+  function updateVolume() {
     gainL.gain.value = master.value * left.value;
     gainR.gain.value = master.value * right.value;
-  });
-  left.addEventListener('input', () => {
-    gainL.gain.value = master.value * left.value;
-  });
-  right.addEventListener('input', () => {
-    gainR.gain.value = master.value * right.value;
-  });
+    showVolume();
+  }
+  master.addEventListener('input', updateVolume);
+  left.addEventListener('input', updateVolume);
+  right.addEventListener('input', updateVolume);
 
   const soundSection = document.getElementById('sound');
   let soundVisible = false;
