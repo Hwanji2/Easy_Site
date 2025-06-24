@@ -86,6 +86,9 @@ nav a {
   font-weight: 500;
   transition: color 0.3s;
 }
+nav a:hover {
+  text-decoration: none;
+}
 nav a:hover,
 nav a.active {
   color: white;
@@ -93,7 +96,8 @@ nav a.active {
 body.light nav a {
   color: #333;
 }
-body.light nav a:hover {
+body.light nav a:hover,
+body.light nav a.active {
   color: black;
 }
 
@@ -110,7 +114,8 @@ body.light nav a:hover {
 }
 body.light .nav-left a:hover,
 body.light .nav-left a.active {
-  color: #fff;
+  color: #333;
+  text-shadow: none;
 }
 
 #themeToggle {
