@@ -38,6 +38,21 @@ window.addEventListener('scroll', () => {
   document.getElementById('progressBar').style.width = progress + '%';
 });
 
+// 네비게이션 투명도 조절
+const nav = document.querySelector('nav');
+const aboutSection = document.getElementById('about');
+function updateNavOpacity() {
+  if (!nav || !aboutSection) return;
+  const aboutBottom = aboutSection.offsetTop + aboutSection.offsetHeight;
+  if (window.scrollY > aboutBottom) {
+    nav.classList.add('dimmed');
+  } else {
+    nav.classList.remove('dimmed');
+  }
+}
+window.addEventListener('scroll', updateNavOpacity);
+window.addEventListener('load', updateNavOpacity);
+
 // 검색 기능
 const searchInput = document.getElementById('searchInput');
 searchInput.addEventListener('keydown', function(e) {
